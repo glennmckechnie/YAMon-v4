@@ -12,26 +12,37 @@
 #   Updated: 2020-03-19 - change windows linefeeds to unix
 ##########################################################################
 
+# Glenn McKechnie - modified 01/02/25
+# use curl with -L  to follow any site redirects / symlinks
+# also replace all http:// with https//: strings in the fetched/downloaded files
+# 
 yget(){
 	local dst="$1"
 	local src="$2"
 	#echo "yget: $src --> $dst"
+	echo "Using curl"
 	if [ ! -z "$bHasCurl" ] ; then
-		curl -sk --max-time 15 -o "$dst" --header "Pragma: no-cache" --header "Cache-Control: no-cache" -A YAMon-Setup "$src"
+		echo "Using curl to fetch ${src} file, writing as ${dst}"
+		curl -skL --max-time 15 -o "$dst" --header "Pragma: no-cache" --header "Cache-Control: no-cache" -A YAMon-Setup "$src"
 		if [ ! -f "$dst" ] ; then
 			echo "	 --> download failed?!? with curl... Trying again with wget"
 			wget "$src" -qO "$dst"
 		fi
 	else
 		#echo "wget $src" -qO "$dst"
+		echo "Using wget"
 		wget "$src" -qO "$dst"
 		if [ ! -f "$dst" ] ; then
-			echo "	 --> download $src failed?!? Trying again"
+			echo "	 --> download $src failed?!? Trying again with wget"
 			wget "$src" -qO "$dst"
 		fi
 	fi
 	 #change windows linefeeds to unix
 	sed -i -e 's/\r$//' "$dst" #change windows linefeeds to unix
+        sed -i 's|http://www\.usage-monitoring\.com|https://www.usage-monitoring.com|g' "$dst" # change any and all occurences of these old URLs
+        sed -i 's|http://usage-monitoring\.com|https://usage-monitoring.com|g' "$dst" # change any and all occurences of these old URLs
+        sed -i 's|curl -sk |curl -skLO |g' "$dst" # follow symliks & don't overwrite existing file.
+        sed -i 's|#echo \"getlatest|echo \"getlatest:|g' "$dst" # what arguments are being passed to the new getlatest.sh
 }
 
 [ -x /usr/bin/clear ] && bCanClear=1
@@ -40,6 +51,7 @@ yget(){
 YAMON='/opt/YAMon4/'
 directory='current'
 [ ! -z "$1" ] && directory="$1"
+echo "${1}"
 
 echo "
 **************************************
@@ -129,7 +141,7 @@ Please check your settings and try again.
 	exit 0
 fi
 
-rm $umversion
+echo " NOT removing file:  rm $umversion"
 
 chmod +x "$YAMON"
 [ -d "${YAMON}data" ] && chmod -R 666 "${YAMON}data"
@@ -158,5 +170,6 @@ Running setup...
 
 
 	"
-[ ! -z "$bCanClear" ] && clear
+sleep 5
+#[ ! -z "$bCanClear" ] && clear
 source "${YAMON}setup.sh"
