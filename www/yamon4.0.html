@@ -15,7 +15,7 @@
 			var _html_version='4.0'
 			var _file_version='4.0'
 			var args=window.location.search.replace('?','').split('&'),ver=args[1]||_file_version,domain='',path=''
-			if(typeof(_doLocalFiles)=='undefined'||_doLocalFiles=='0'){
+			if(!(localStorage.getItem('devOrCurr')==='dev')){
 				path = (localStorage.getItem('devOrCurr') || 'current') + '/'
 				domain='https://usage-monitoring.com/'
 			}
@@ -38,6 +38,12 @@
 						$.ajax({crossDomain: true, url: domain + path + 'js/yamon' + ver+ '.js',dataType: "script", cache:false});
 					});
 			})
+			console.log("domain is:",domain)
+			console.log("path is", path)
+			console.log("devOrCurr is ",localStorage.getItem("devOrCurr"))
+			//console.log("doLocalFiles is ",localStorage.getItem("doLocalFiles"))
+			console.log("ajaxCache is ",localStorage.getItem("ajaxCache"))
+			console.log("show-isp-out is :", localStorage.getItem("show-isp-out"))
 		</script>
 
 		<link rel="stylesheet" type="text/css" href="css/custom.css"/>
@@ -511,17 +517,17 @@
                                     <th class='AM'>10</th>
                                     <th class='AM'>11</th>
                                     <th class='PM'>12</th>
-                                    <th class='PM'>1</th>
-                                    <th class='PM'>2</th>
-                                    <th class='PM'>3</th>
-                                    <th class='PM'>4</th>
-                                    <th class='PM'>5</th>
-                                    <th class='PM'>6</th>
-                                    <th class='PM'>7</th>
-                                    <th class='PM'>8</th>
-                                    <th class='PM'>9</th>
-                                    <th class='PM'>10</th>
-                                    <th class='PM'>11</th>
+                                    <th class='PM'>13</th>
+                                    <th class='PM'>14</th>
+                                    <th class='PM'>15</th>
+                                    <th class='PM'>16</th>
+                                    <th class='PM'>17</th>
+                                    <th class='PM'>18</th>
+                                    <th class='PM'>19</th>
+                                    <th class='PM'>20</th>
+                                    <th class='PM'>21</th>
+                                    <th class='PM'>22</th>
+                                    <th class='PM'>23</th>
                                 </tr>
                                 <tr class='hourly-row hidden'>
                                     <td class='group-name'>-</td>
@@ -1042,9 +1048,9 @@
 							</fieldset>
 							<fieldset>
 								<legend>Debug</legend>
-								<p title="Use files from /dev rather than /current">
+								<p title="Use the files from this (your) server, or the files from https://usage-monitoring.com/current">
 									<input type="checkbox" id="devOrCurr">
-									<label for="devOrCurr">Use `/dev` JS & CSS files</label>
+									<label for="devOrCurr">Use this servers JS & CSS files</label>
 								</p>
 								<p title="Set ajaxSetup cache to true (***recommended***)">
 									<input type="checkbox" id="ajaxCache">
