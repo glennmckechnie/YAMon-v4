@@ -1,37 +1,33 @@
 # YAMon-v4
 YA Fork of YAMon v4 !
 
-       Welcome to this Github YAMon (unofficial) fork
+Welcome to this Github YAMon (unofficial) fork
 
 This is a forked version of YAMon with modifications.
 
 The first and most important modification is to the install script, it should now work.
+Use __install.original.sh__, but keep reading...
 
-The original installer has been fixed and works as it did before the https:///usage-monitoring.com
-site changes. It is still available here but as it fetches the same files as in
-this repo then it can be consider redundant, usable but redundant. It will work only while the
-parent site remains up. And with Al's long absence this could ?? be a problem.
+The original installer has been fixed and works as it did before the https:///usage-monitoring.com site changes. It is still available here but as it fetches the same files as in this repo then it can be consider redundant, usable but redundant. It will work only while the parent site remains up too. And with Al's long absence this could ?? be a problem.
 
-For now though, it is usable. If you want the original usage-moitoring.com sites version then use
- install.original.sh  It should now work around the http / https issues.!
+For now though, it is usable. If you want the original usage-monitoring.com sites version then use  __install.original.sh__  It should now work around the http / https issues.!
 
-If you want the files in this repo, here then run install.sh
+If you want the files in this repo here, then run the install.sh script
 
-So...You have choices, only you decide!
+So...You have choices, and only you can decide!
 
-There have been a few modifications here.
+There have been a few modifications to the files here and to use them, you need to install them ( using __install.sh__ ).
 
 I've since added Activ8me (Australia) csv files as an option for monthly downloads. It works! But...
 
-Because of that change, I can't use the js/util4.0.js file from usage-monitoring.com and as the existing html page ignores the local version, we have to turn off / bypass some coded URLs.
+Because of that change, I can't use the js/util4.0.js file from usage-monitoring.com and as the existing html page ignores the modified local version, we have to turn off / bypass some hard coded URLs.
 
-The default configuration of YAMon always fetches the .js files from the parent site, run your browsers inspector  inspect(Q)  (or whatever it's called) and you'll see what's happening. That code made sense when chnages could be rolled out to everyone from a centrally controlled server - but it seems that option is closed.  (As an aside - Al C. deserves a medal for supporting so many installation types./ models the central server would have made it easier instead of impossible. A sterling job)
+The default configuration of YAMon always fetches the .js files from the parent site, run your browsers inspector  inspect(Q)  (or whatever it's called) and you'll see what's happening. No doubt that code made sense when changes could be rolled out to everyone from a centrally controlled server - but it seems that option is closed.  (As an aside - Al C. deserves a medal for supporting so many installation types./ models the central server would have made it easier instead of impossible. But now it's unecessary.)
 
 There is a config option "_doLocalFiles=1" that can be set in the config.file but the html page never reads/uses it. It could be manually copied into the html page, but a configurable option is always good.
-To do that, I've repurposed the 'dev / current' tick box under the html settings tab - section Debug ...__Use this servers JS & CSS files__. iIf ticked then we now use the local version, not __dev__(elopment), and __current__ remains as the original "fetch from usage-monitoring.com/current" unticked as it was before.
+To do that, I've repurposed the 'dev / current' tick box under the html settings tab - section Debug ...__Use this servers JS & CSS files__. If it is ticked then we now use the local version, not __dev__(elopment), and __current__ remains as the original "fetch from usage-monitoring.com/current": unticked as it was before.
 
 Fresh out of the box, that box is unticked. If you want to use your local verion of files, then tick it!
-
 
 
 For old, but still relevant installation tips & tricks for a manual install - what we are doing, see 
@@ -40,10 +36,14 @@ For old, but still relevant installation tips & tricks for a manual install - wh
  Please report any issues from this repo as github issues via the link on this repo...
      https://github.com/glennmckechnie/YAMon-v4
 
+Tested on an __OpenWRT One__ with the __opkg iptables-zz-legacy__ installed.
 
-========================
+It's running, with an occasional misfire. (On occasion the hourly file gets mangled, but the raw data back up has all the required values to rebuild the br0ken file. It's still early days in the testing stakes, and it did show me what I needed to know - what was using all my data ...several things!
 
-                The Official repository for YAMon v4
+
+============The following notes are from the original README.md file ============
+
+__The Official repository for YAMon v4__
 
 See https://usage-monitoring.com/v4Install+Validate.php for instructions on how to install YAMon and validate the installation.
 What is YAMon?
