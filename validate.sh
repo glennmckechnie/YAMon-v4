@@ -75,3 +75,5 @@ iptables -L YAMONv40 >> $vl
 
 
 cat "$vl"
+
+echo -e "\n\n\t These results are from the $vl file \n"
