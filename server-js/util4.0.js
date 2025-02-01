@@ -1,13 +1,15 @@
 "use strict"
 /*
 ##########################################################################
-#																		 #
-# Yet Another Monitor (YAMon)											 #
-# Copyright (c) 2013-present Al Caughey									 #
-# All rights reserved.													 #
-# See `yamon4.x.js` for more T&C's										 #
-#																		 #
+#									 #
+# Yet Another Monitor (YAMon)						 #
+# Copyright (c) 2013-present Al Caughey				 #
+# All rights reserved.							 #
+# See `yamon4.x.js` for more T&C's					 #
+#									 #
 ##########################################################################
+# Glenn McKechnie - modified 01/02/25
+# added Activ8me (Australia) csv dat file format
 */
 jQuery.extend (
     jQuery.expr[':'].containsCI = function (a, i, m) {
@@ -1326,7 +1328,8 @@ function setButtonsActions(){
 			in_txt=in_txt.replace(/, /g,' ').replace(/,/g,'')
 		else if (isp=='Sodetel') //change 1,234.56 to 1234.56
 			in_txt=in_txt.replace(/,/g,'')
-
+                else if (isp=='Activ8me')
+                        in_txt = in_txt.replace(/mb/g,'') // remove mb string
 		
 		in_txt=in_txt.replace(/"/g,'').replace(/[ \/,\t]+/g,' ').split('\n').sort()
 
@@ -1364,6 +1367,10 @@ function setButtonsActions(){
 					dof=5, upf=6
 				break
 				break
+                                case 'Activ8me':
+                                        factor=g_toMB
+                                        daf=0, mnf=1, yrf=2, dof=3, upf=4
+                                break
 				case 'Telstra':
 					factor=g_toMB
 					daf=0, mnf=1, dof=2, upf=3, yrf=''
@@ -3044,7 +3051,7 @@ function checkFiles(){
 	});
 }
 function addISPList(){
-	var isp_list = ['','Rogers|Canada','Electronic Box|Canada','Bell (Eng)|Canada','Bell (Fr)|Canada','Cox|United States','ATT|United States','Telstra|Australia','Sodetel|Lebanon','TekSavvy|Canada','GCI|United States','Videotron|United States','Cable ONE|United States','Afrihost|South Africa']
+	var isp_list = ['','Rogers|Canada','Electronic Box|Canada','Bell (Eng)|Canada','Bell (Fr)|Canada','Cox|United States','ATT|United States','Activ8me|Australia','Telstra|Australia','Sodetel|Lebanon','TekSavvy|Canada','GCI|United States','Videotron|United States','Cable ONE|United States','Afrihost|South Africa']
 	$('#isp-format').html('')
 	$('<option/>').attr('value','').attr('disabled','disabled ').text('Pick your ISP').appendTo('#isp-format')
 	$(isp_list).sort().each(function (a, b) {
