@@ -7,7 +7,7 @@
 #
 # With Al's absence from his site and development seemingly dead
 # in the water, the original installer had stopped working.  Using
-# it overwroteany workarounds applied locally
+# it overwrote any workarounds applied locally
 # That installer has been tweaked and should work for others - I've
 # tested it and it work for me ! 
 
