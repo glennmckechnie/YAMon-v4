@@ -18,17 +18,17 @@ So...You have choices, and only you can decide!
 
 There have been a few modifications to the files here and to use them, you need to install them ( using __install.sh__ ).
 
-I've since added Activ8me (Australia) csv files as an option for monthly downloads. It works! But...
+I've since added the __Activ8me (Australia)__ ISPs csv files as an option for monthly downloads. It works! But I can't use it without changing the way YAMon accesses its files.
 
-Because of that change, I can't use the js/util4.0.js file from usage-monitoring.com and as the existing html page ignores the modified local version, we have to turn off / bypass some hard coded URLs.
+YAMon fetches the 2 main javascipt files from the parent site so I can't use my modified js/util4.0.js file. The existing html page doesn't know anything about my modified local version unless I turn off / bypass some hard coded URLs.
 
-The default configuration of YAMon always fetches the .js files from the parent site, run your browsers inspector  inspect(Q)  (or whatever it's called) and you'll see what's happening. No doubt that code made sense when changes could be rolled out to everyone from a centrally controlled server - but it seems that option is closed.  (As an aside - Al C. deserves a medal for supporting so many installation types/models. The central server would have made that task easier instead of impossible. However now it's unecessary and will remain that way until it restarts, if it ever does.)
+To see the default configuration of YAMon in action, run your browsers inspector inspect(Q) for firefox,  and you'll see what's happening. No doubt configuring the code that way made sense when changes could be rolled out to everyone from a centrally controlled server - and while the server remains, there are no longer any code updates.  (As an aside - Al C. deserves a medal for supporting so many installation types/models. The central server would have made that task easier instead of impossible.)
 
-There is a config option "_doLocalFiles=1" that can be set in the config.file but the html page never reads/uses it. Thaty switch could be manually copied into the html page, but ease of configurationis alawys a better option.
+That said, there is a config option "_doLocalFiles=1" that can be set in the config.file but the html page never reads/uses it, it's not implemented anywhere that I could find. I can't see the origins of that code, or if there was anything further to it. Thaty switch could be manually copied into the html page, but ease of configuration is alawys a better option.
 
-To do that, I've repurposed the 'dev / current' tick box under the html __Settings__ tab - in the __Debug__ section, see __Use this servers JS & CSS files__. If that box is ticked then we now use the local version,(not __dev__.elopment as it was before) and the __current__ option remains as the original "fetch from usage-monitoring.com/current" switch when __unticked__.
+To make it easier and implement that switching function, I've repurposed the 'dev / current' tick box which is under the html __Settings__ tab - in the __Debug__ section :  __Use this servers JS & CSS files__. Originally that selected between Als /dev/ or /current/ versions. Now though, if that box is ticked then we use our local version, (not __dev__.elopment as it was before) and the old __current__ option remains as the original "fetch from usage-monitoring.com/current" switch when it is __unticked__.
 
-Fresh out of the box, that box is unticked. If you want to use your local verion of files, then tick it! If you want to continue to use Als server then leave it. If you had database keys, that's the only way you can access the site - and I have no idea if that is still an option - it's before my time. 
+Fresh out of the box - a new installation -  that box is unticked. If you want to use your local verion of files, then __tick__ it! If you want to continue to use Als server then leave it unticked. For instance, You would do that if you had database keys, that's the only way you can access the site. I have no idea if that function is still active. it's before my time. 
 
 
 For old, but still relevant installation tips & tricks for a manual install - which we are doing, see 
