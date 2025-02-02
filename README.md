@@ -39,10 +39,19 @@ For old, but still relevant installation tips & tricks for a manual install - wh
 
 Tested on an __OpenWRT One__ with the __opkg iptables-zz-legacy__ installed.
 
-It's running, with an occasional misfire. (On occasion the hourly file gets mangled, but the raw data back up has all the required values to rebuild the br0ken file. It's still early days in the testing stakes, and it did show me what I needed to know - what was using all my data ...several things!
+- This github installation method __install.sh__ requires that the github repo is unpacked into __/opt/YAMon__ and __install.sh__ is run from there.
 
-I run noScript in the firefox browser, and despite adding an exception for my YAMon installation, the javascript doesn't always fire up. If I bypass NoScript completely, it will fire up and continue running whichever state NoScript is in!  But it does work, and apppears to be more informative than the nlbwmon package  (nlbwmon 2024.02.21~c7616bcf-r1	~21.66 KiB	OpenWrt Traffic Usage Monitor)  __YMMV__
+- Run the validate.sh script when finished and make sure it matches.
 
+- Read.. https://usage-monitoring.com/v4Install+Validate.php
+
+It's running, with an occasional misfire. On occasion the hourly file gets mangled, but the raw data back up has all the required values to rebuild the br0ken file. It's still early days in the testing stakes, and it did show me what I needed to know - what was using all my data ... several things!
+
+I run noScript in the firefox browser, and despite adding an exception for my YAMon installation, the javascript doesn't always fire up. If I bypass NoScript completely, it will then fire up and continue running whichever state NoScript is in!  
+
+But it does work, and apppears to be more informative than the nlbwmon package  (nlbwmon 2024.02.21~c7616bcf-r1	~21.66 KiB	OpenWrt Traffic Usage Monitor)  __YMMV__
+
+Added Als original copyright licence as a file. My trivial changes use the same licence.
 
 ============The following notes are from the original README.md file at the official repo ============
 
