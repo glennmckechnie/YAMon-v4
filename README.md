@@ -22,15 +22,16 @@ I've since added Activ8me (Australia) csv files as an option for monthly downloa
 
 Because of that change, I can't use the js/util4.0.js file from usage-monitoring.com and as the existing html page ignores the modified local version, we have to turn off / bypass some hard coded URLs.
 
-The default configuration of YAMon always fetches the .js files from the parent site, run your browsers inspector  inspect(Q)  (or whatever it's called) and you'll see what's happening. No doubt that code made sense when changes could be rolled out to everyone from a centrally controlled server - but it seems that option is closed.  (As an aside - Al C. deserves a medal for supporting so many installation types./ models the central server would have made it easier instead of impossible. But now it's unecessary.)
+The default configuration of YAMon always fetches the .js files from the parent site, run your browsers inspector  inspect(Q)  (or whatever it's called) and you'll see what's happening. No doubt that code made sense when changes could be rolled out to everyone from a centrally controlled server - but it seems that option is closed.  (As an aside - Al C. deserves a medal for supporting so many installation types/models. The central server would have made that task easier instead of impossible. However now it's unecessary and will remain that way until it restarts, if it ever does.)
 
-There is a config option "_doLocalFiles=1" that can be set in the config.file but the html page never reads/uses it. It could be manually copied into the html page, but a configurable option is always good.
-To do that, I've repurposed the 'dev / current' tick box under the html settings tab - section Debug ...__Use this servers JS & CSS files__. If it is ticked then we now use the local version, not __dev__(elopment), and __current__ remains as the original "fetch from usage-monitoring.com/current": unticked as it was before.
+There is a config option "_doLocalFiles=1" that can be set in the config.file but the html page never reads/uses it. Thaty switch could be manually copied into the html page, but ease of configurationis alawys a better option.
 
-Fresh out of the box, that box is unticked. If you want to use your local verion of files, then tick it!
+To do that, I've repurposed the 'dev / current' tick box under the html __Settings__ tab - in the __Debug__ section, see __Use this servers JS & CSS files__. If that box is ticked then we now use the local version,(not __dev__.elopment as it was before) and the __current__ option remains as the original "fetch from usage-monitoring.com/current" switch when __unticked__.
+
+Fresh out of the box, that box is unticked. If you want to use your local verion of files, then tick it! If you want to continue to use Als server then leave it. If you had database keys, that's the only way you can access the site - and I have no idea if that is still an option - it's before my time. 
 
 
-For old, but still relevant installation tips & tricks for a manual install - what we are doing, see 
+For old, but still relevant installation tips & tricks for a manual install - which we are doing, see 
        https://usage-monitoring.com/installv4.php
 
  Please report any issues from this repo as github issues via the link on this repo...
@@ -40,8 +41,10 @@ Tested on an __OpenWRT One__ with the __opkg iptables-zz-legacy__ installed.
 
 It's running, with an occasional misfire. (On occasion the hourly file gets mangled, but the raw data back up has all the required values to rebuild the br0ken file. It's still early days in the testing stakes, and it did show me what I needed to know - what was using all my data ...several things!
 
+I run noScript in the firefox browser, and despite adding an exception for my YAMon installation, the javascript doesn't always fire up. If I bypass NoScript completely, it will fire up and continue running whichever state NoScript is in!  But it does work, and apppears to be more informative than the nlbwmon package  (nlbwmon 2024.02.21~c7616bcf-r1	~21.66 KiB	OpenWrt Traffic Usage Monitor)  __YMMV__
 
-============The following notes are from the original README.md file ============
+
+============The following notes are from the original README.md file at the official repo ============
 
 __The Official repository for YAMon v4__
 
