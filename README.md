@@ -22,7 +22,7 @@ I've since added the __Activ8me (Australia)__ ISPs csv files as an option for mo
 
 YAMon fetches the 2 main javascipt files from the parent site so I can't use my modified js/util4.0.js file. The existing html page doesn't know anything about my modified local version unless I turn off / bypass some hard coded URLs.
 
-To see the default configuration of YAMon in action, run your browsers inspector inspect(Q) for firefox,  and you'll see what's happening. No doubt configuring the code that way made sense when changes could be rolled out to everyone from a centrally controlled server - and while the server remains, there are no longer any code updates.  (As an aside - Al C. deserves a medal for supporting so many installation types/models. The central server would have made that task easier instead of impossible.)
+To see the default configuration of YAMon in action, run your browsers inspector inspect(Q) for firefox - F12 key -,  and you'll see what's happening. No doubt configuring the code that way made sense when changes could be rolled out to everyone from a centrally controlled server - and while the server remains, there are no longer any code updates.  (As an aside - Al C. deserves a medal for supporting so many installation types/models. The central server would have made that task easier instead of impossible.)
 
 That said, there is a config option "_doLocalFiles=1" that can be set in the config.file but the html page never reads/uses it, it's not implemented anywhere that I could find. I can't see the origins of that code, or if there was anything further to it. Thaty switch could be manually copied into the html page, but ease of configuration is alawys a better option.
 
