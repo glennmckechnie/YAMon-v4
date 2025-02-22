@@ -1,11 +1,16 @@
 ##########################################################################
 # Yet Another Monitor (YAMon)
-# Copyright (c) 2013-present Al Caughey
+# Copyright (c) 2013-2024 Al Caughey
+# Copyright (c) 2025 Glenn McKechnie
 # All rights reserved.
 #
 # script to enable/disable entries in /etc/crontabs
 # run: /opt/YAMon4/start.sh
 # History
+# 2025-02-21: GMcK
+#   Only add one YAMoN cron group - if d_baseDir changed they would be orphaned
+#   Data could be corrupted
+#
 # 2020-01-26: 4.0.7 - changes to cronJobsFile, stopService & startService for Tomato
 #					- renamed StartCronJobs to StartScheduledJobs
 #					- fixed StopCruJobs() issue in Tomato
@@ -15,7 +20,6 @@
 # 2019-06-18: development starts on initial v4 release
 #
 ##########################################################################
- 
 Send2Log "start-stop" 1
 
 if [ "$_firmware" -eq "0" ] ; then
@@ -42,15 +46,27 @@ ResetCron(){
 StartScheduledJobs(){
 	SetCronJobs(){ #for firmware using cron
 		touch "$cronJobsFile"
-		local fileContents=$(cat "$cronJobsFile")
-		local newjobs=$(echo "$fileContents" | grep -v "${d_baseDir}" | grep -v "YAMon jobs")
+	        local _crds # timestamp for cronjob edits
+		local fileContents
+		local newjobs
+		set -x
+		fileContents=$(cat "$cronJobsFile")
+                _crds=$(date +"%Y-%m-%d--%H:%M")
+		# Stop adding double entry cronjobs - if/when $d_baseDir changes
+		# Comment out lines between "#Start of YAMon jobs" and "#End of YAMon jobs"
+		newjobs=`awk '/#Start of YAMon jobs/,/#End of YAMon jobs/ { sub(/^/, "#"); } { print }' <<< "$fileContents"`
+		# Filter out lines containing the current base directory or "YAMon jobs"
+		# ie:- remove clutter if $d_basDir does change
+		newjobs=$(echo "$newjobs" | grep -v "${d_baseDir}"| grep -v "YAMon jobs")
+		newjobs="${newjobs}\n#Older duplicate YAMon jobs were replaced: (updated $_crds)"
 		local networkChecks=''
 		if [ "${_check4Devices:-1}" -gt "1" ] ; then
 			networkChecks="/${_check4Devices}"
 		fi
 		local user=''
 		[ "$_firmware" -eq "0" ] && user='root'
-		newjobs="${newjobs}\n#YAMon jobs: (updated $_ds)"
+		# add unique Start string
+		newjobs="${newjobs}\n#Start of YAMon jobs: (updated $_crds)"
 		newjobs="${newjobs}\n0 0 ${_ispBillingDay:-1} * * $user ${d_baseDir}/new-billing-interval.sh"
 		newjobs="${newjobs}\n59 * * * * $user ${d_baseDir}/end-of-hour.sh"
 		newjobs="${newjobs}\n59 23 * * * $user ${d_baseDir}/end-of-day.sh"
@@ -72,6 +88,8 @@ StartScheduledJobs(){
 		newjobs="${newjobs}\n$udt-$((60 - $udt))/$udt * * * * $user ${d_baseDir}/update-reports.sh"
 		# line below is seemingly not a reliable as the one above?!?
 		#newjobs="${newjobs}\n*${networkChecks} * * * * $user ${d_baseDir}/check-network.sh"
+		# add unique End string
+		newjobs="${newjobs}\n#End of YAMon jobs: (updated $_crds)"
 		
 		echo -e "$newjobs" > "$cronJobsFile"
 		Send2Log "SetCronEntries: updating \`$cronJobsFile\` --> $(IndentList "$newjobs")" 1
