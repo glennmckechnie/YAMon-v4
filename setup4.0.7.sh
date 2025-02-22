@@ -1,8 +1,9 @@
 #!/bin/sh
-
+# setUp4.0.sh
 ##########################################################################
 # Yet Another Monitor (YAMon)
-# Copyright (c) 2013-present Al Caughey
+# Copyright (c) 2013-2024 Al Caughey
+# Copyright (c) 2025 Glenn McKechnie
 # All rights reserved.
 #
 # Script to help set baseline values in config.file for YAMon4.x
@@ -241,7 +242,7 @@ source "${d_baseDir}/includes/shared.sh"
 
 configStr=$(cat "$_configFile")
 
-[ -n "$_canClear" ] && clear
+ [ -n "$_canClear" ] && clear
 
 SetupLog "Launched setup.sh - v$_version" 2
 SetupLog "Baseline settings: \`$_configFile\`" 2
@@ -258,14 +259,20 @@ _firmware=0
 
 if [ -f "/etc/openwrt_release" ] ; then
 	distro=$(cat /etc/openwrt_release | grep -i 'DISTRIB_ID' | cut -d"'" -f2)
-	installedfirmware=$(cat /etc/openwrt_release | grep -i 'DISTRIB_DESCRIPTION' | cut -d"'" -f2)
+	# Adjust to detect OpenWrt One version - assume this change is applicable to all variants - Ha!
+	#installedfirmware=$(cat /etc/openwrt_release | grep -i 'DISTRIB_DESCRIPTION' | cut -d"'" -f2)
+	installedfirmware=$(cat /etc/openwrt_release | grep -i 'DISTRIB_DESCRIPTION' | cut -d"'" -f2 | cut -d" " -f1)
 	installedversion=''
 	installedtype=''
-	if [ "$distro" == "$le_str" ] ; then
+	# Check for the actual OpenWrt router first
+	if [ "$distro" == "$installedfirmware" ] ; then
+		op_str="OpenWrt (*)"
+	        _firmware=1
+	elif [ "$distro" == "$le_str" ] ; then
 		le_str='LEDE (*)'
 		_firmware=4
 	else
-		tu_str='Turris (*)'
+		tu_str="Turris (*)"
 		_firmware=6
 	
 	fi
@@ -314,7 +321,7 @@ UpdateConfig '_updated' "$(date +"%Y-%m-%d %H:%M:%S")"
 UpdateConfig '_router' "$routermodel"
 UpdateConfig '_firmwareName' "$installedfirmware $installedversion $installedtype"
 
-t_installmode='b'
+t_installmode='a'
 Prompt 't_installmode' "Do you want run setup in Basic(*) or Advanced mode?" "Options:
       \`b\` -> Basic mode: fewer prompts; most default settings will be selected automatically (*)
       \`a\` -> Advanced mode: more prompts to better tailor your settings" "$t_installmode" "^[aAbB]$" 'running-setup'
