@@ -1,14 +1,17 @@
 #!/bin/sh
+#setPaths.sh
 
 ##########################################################################
 # Yet Another Monitor (YAMon)
-# Copyright (c) 2013-present Al Caughey
+# Copyright (c) 2013--present Al Caughey
+# Copyright (c) 2025 Glenn McKechnie
 # All rights reserved.
 #
 # generate /includes/paths.sh with computed paths files & logs; also computed function names(shared between one or more scripts)
 # values generated during setup & verified on startup or on demand
 # run: /opt/YAMon4/setPaths.sh
 # History
+# 2025-02-22: remove deprecated '-w -W1' from OpenWrt entry
 # 2020-01-26: 4.0.7 - removed routerfile entry from paths (as no longer used); added defensive default when checking if IPv6 is enabled
 #                   - added another check for ipv6Enabled & static leases for Tomato (thx tvlz); combined AsusMerlin & Tomato entries
 # 2020-01-26: 4.0.6 - added {xxx:-_} defaults in a number of spots
@@ -181,7 +184,7 @@ echo -e "\n#Firmware specfic & dependent entries:" >> "${pathsFile}"
 		AddEntry "_wwwPath" "${_wwwPath:-/tmp/www/}"
 		AddEntry "_wwwURL" '/yamon'
 		_lan_iface='br-lan'
-		AddEntry "_iptablesWait" '-w -W1'
+		AddEntry "_iptablesWait"
 		
 		hip6=$( uci show ddns.myddns_ipv6.use_ipv6 | cut -d'=' -f2 | sed -e "s~'~~g")
 		[ "${hip6:-0}" -eq '1' ] && ipv6Enabled=1
