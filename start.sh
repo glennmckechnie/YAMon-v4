@@ -1,4 +1,5 @@
 #!/bin/sh
+# start.sh
 
 ##########################################################################
 # Yet Another Monitor (YAMon)
@@ -54,13 +55,15 @@ SetWebDirectories()
 	}
 	Send2Log "SetWebDirectories" 1
 	[ -d "${_wwwPath}" ] || mkdir -p "${_wwwPath}"
-	[ -d "${_wwwPath}js" ] || mkdir -p "${_wwwPath}js"
+	# [ -d "${_wwwPath}js" ] || mkdir -p "${_wwwPath}js"
 	chmod -R a+rX "${_wwwPath}"
 	[ ! -h "/www${_wwwURL}" ] && ln -s "/tmp${_wwwURL}" "/www${_wwwURL}"
 
-	#ln -s /tmp/www /www/yamon
+	ln -s /tmp/www /www/yamon
 	AddSoftLink "${d_baseDir}/www/css" "${_wwwPath}css"
 	AddSoftLink "${d_baseDir}/www/images" "${_wwwPath}images"
+	# add js path
+	AddSoftLink "${d_baseDir}/www/js" "${_wwwPath}js"
 	[ "$_wwwData" == 'data3/' ] && _wwwData=''
 	AddSoftLink "${_path2data%/}" "${_wwwPath}${_wwwData:-data4}"
 	AddSoftLink "${_path2logs%/}" "${_wwwPath}logs"
