@@ -11,9 +11,16 @@
 ##########################################################################
 
 # History
-# 2020-01-26: 4.0.7 - fixed startup & shutdown code for Tomato (thx tvlz); added CopyDataFiles() to properly copy/rename old data files; added prompt for `_purgeOldFiles` (advanced only)
-# 2020-01-03: 4.0.6 - check copied users.js to ensure that entry for users_updated exists; check nvram modelNumber too to get device name
-# 2019-12-23: 4.0.5 - added prompt to run fixes; correctly added _firmware, etc to config.file (if missing)
+# 2025-02: change unused $d_www_Path to $_wwwPath, remove errant sleep call
+#   (probably a cut n paste slip up), retire database question (wrap it in
+#   an ununused function.
+# 2020-01-26: 4.0.7 - fixed startup & shutdown code for Tomato (thx tvlz);
+#   added CopyDataFiles() to properly copy/rename old data files;
+#   added prompt for `_purgeOldFiles` (advanced only)
+# 2020-01-03: 4.0.6 - check copied users.js to ensure that entry for
+#   users_updated exists; check nvram modelNumber too to get device name
+# 2019-12-23: 4.0.5 - added prompt to run fixes; correctly added _firmware,
+#   etc to config.file (if missing)
 # 2019-11-09: 4.0.2 - improvements for upgrading from v3
 # 2019-10-24: 4.0.1 - improvements for fresh install
 # 2019-10-09: 4.0.0 - first update for v 4.0
@@ -185,6 +192,7 @@ echo -e "${los}"
 
 _ds=$(date +"%Y-%m-%d")
 _ts=$(date +"%T")
+_tep=$(date +"%s")
 setupLogFile="/tmp/yamon/setup ($_ds $_ts).log"
 [ ! -d "/tmp/yamon" ] && mkdir -p "/tmp/yamon"
 [ ! -f "$setupLogFile" ] && touch "$setupLogFile"
@@ -210,9 +218,9 @@ and then hit <return>.
 ${los}"
 
 if [ -f "${d_baseDir}/config.file" ] ; then
-	echo -e "\n\n*** Backing up existing config file '${d_baseDir}/config.file'\n    to '${d_baseDir}/config.old' (just to be safe)"
-	SetupLog "Config file: ${d_baseDir}/config.file' backed up to ${d_baseDir}/config.old"
-	cp "${d_baseDir}/config.file" "${d_baseDir}/config.old"
+	echo -e "\n\n*** Backing up existing config file '${d_baseDir}/config.file'\n    to '${d_baseDir}/config.last' (just to be safe)"
+	SetupLog "Config file: ${d_baseDir}/config.file' backed up to ${d_baseDir}/config.last"
+	cp "${d_baseDir}/config.file" "${d_baseDir}/config.last"
 else
 	oldInstall=$(find $(dirname "$d_baseDir") -name 'config.file'  | grep -n '')
 	if [ -n "$(echo "$oldInstall")" ] ; then
@@ -462,6 +470,8 @@ If yes, files more than 30 days old will be removed from your USB drive.
 *** NB - This will *NOT* remove data files!' "$yn_y" '1' $zo_r '_purgeOldFiles'
 fi
 
+d_integration(){
+# lazy block comment - this step can be considered redundant.
 [ -n "$_canClear" ] && clear
 
 if [ -z "$_dbkey" ] ; then
@@ -510,6 +520,7 @@ See also https://usage-monitoring.com/privacy.php
 		rm /tmp/yamon/dbkey.txt
 	fi
 fi
+}
 
 if [ "$t_installmode" == 'b' ] ; then
 	
@@ -531,20 +542,26 @@ else
 	CheckDataPath
 	
 	if [ "$_firmware" == "1" ] || [ "$_firmware" == "4" ] || [ "$_firmware" == "6" ] || [ "$_firmware" == "7" ] ; then
-		d_wwwPath='/tmp/www/'
+		_wwwPath='/tmp/www/'
 		lan_ip=$(uci get network.lan.ipaddr)
 		[ -z "$lan_ip" ] && lan_ip=$(ifconfig br-lan | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}')
 		[ "$_wwwURL" == '/user' ] && _wwwURL='/yamon'
 	elif [ "$_firmware" == "2" ] || [ "$_firmware" == "3" ] || [ "$_firmware" == "5" ] ; then
-		d_wwwPath='/tmp/var/wwwext/'
+		_wwwPath='/tmp/var/wwwext/'
 	else
 		lan_ip=$(nvram get lan_ipaddr)
 	fi
 
-	Prompt '_wwwPath' 'Specify the path to the web directories?' "The path must start and end with a \`/\`" "$d_wwwPath" $re_path_slash
+	Prompt '_wwwPath' 'Specify the path to the web directories?' "The path must start and end with a \`/\`" "$_wwwPath" $re_path_slash
 	Prompt '_wwwURL' "Specify the URL path to the reports - e.g. $lan_ip\`<path>\`?" "  \`<path>\` must start and end with a \`/\`.  
-      NB - enter just the path & do *NOT* include the IP address!" "$d_wwwURL" $re_path_slash
-
+      NB - enter just the path & do *NOT* include the IP address!" "$_wwwURL" $re_path_slash
+#set -v -x
+	if [ "$_firmware" == "1" ] && [ -d '/www' ] ; then
+	     # specifically for an 'openwrt one'
+	     ln -s ${d_baseDir}/www ${_wwwPath%/}
+	     ln -s ${_wwwPath} /www${_wwwURL}
+        fi
+#set +v +x
 	Prompt '_includeBridge' "Do you have a bridge on your network?${_nlsp}(i.e., a second router or other device to extend the wireless range)" "$yn_n" '0' $zo_r
 	if [ "$_includeBridge" == "1" ] ; then
 		Prompt '_bridgeMAC' "What is the MAC address for your bridge device?${_nlsp}See the help topic if you have multiple bridging devices" "Enter a valid MAC address - e.g., 11:22:33:44:55:66" '' "^([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}$" '_includeBridge'
@@ -581,11 +598,10 @@ if [ ! -f "$_configFile" ] ; then
 	SetupLog "Created and saved settings in new file: \`$_configFile\`" 2
 	echo -e "${los}${_nls}Created and saved settings in new file: \`$_configFile\`${los}"
 else
-	cp "$_configFile" "${d_baseDir}/config.old"
+	cp "$_configFile" "${d_baseDir}/config-${_tep}.old"
 	SetupLog "Updated existing settings: \`$_configFile\`" 2
-    echo -e "${los}${_nls}Saved configuration settings to \`$_configFile\`${_nls}& copied previous file to \`${d_baseDir}/config.old\`${los}"
+    echo -e "${los}${_nls}Saved configuration settings to \`$_configFile\`${_nls}& copied previous file to \`${d_baseDir}/config-${_tep}.old\`${los}"
 fi
-
 echo -e "$configStr" > "$_configFile"
 
 su="${d_baseDir}/start.sh 'reboot'"
@@ -599,6 +615,7 @@ chmod "$t_perm" -R "$_wwwPath"
 SetupLog "Changed \`$_wwwPath\` permissions to: \`$t_perm\`" 2
 chmod "$t_perm" -R "${d_baseDir}/www"
 SetupLog "Changed \`${d_baseDir}/www\` permissions to: \`$t_perm\`" 2
+
 
 startup_delay='10'
 if [ "$_firmware" == "1" ] || [ "$_firmware" == "4" ] ; then
@@ -641,9 +658,7 @@ elif [ "$_firmware" == "2" ] || [ "$_firmware" == "3" ] || [ "$_firmware" -eq "5
 	elif [ -z "$cnsu" ] && [ -z "$(echo $cnsu | grep "$su")" ] ; then
 		[ "$t_installmode" == 'a' ] && Prompt 'startup_delay' "By default, \`start.sh\` will delay for 60 seconds prior to starting.${_nlsp}Some older/slower routers may require extra time." 'Enter the start-up delay [0-300]' '60' "^([0-9]|[1-9][0-9]|[1-2][0-9][0-9]|300)$"
 		SetupLog "Added $su to nvram-->script_usbmount" 2
-		nvram set script_usbmount="$cnsu
-sleep $startup_delay
-$su"
+		nvram set script_usbmount="$cnsu $su"
 
 	else
 		SetupLog "Did not create start entries in nvram?!?" 2
@@ -654,8 +669,7 @@ $su"
 		SetupLog "Shutdown - $sd already exists in \`nvram-->script_usbumount\`" 2
 	elif [ -z "$cnsd" ] && [ -z "$(echo $cnsd | grep "$sd")" ] ; then
 		SetupLog "Added $sd to nvram-->script_usbumount" 2
-		nvram set script_usbumount="$cnsd
-$sd"
+		nvram set script_usbumount="$cnsd $sd"
  	else
 		SetupLog "Did not create stop entries in nvram?!?" 2
  	fi
@@ -683,9 +697,7 @@ else
 	elif [ -z "$cnsu" ] && [ -z "$(echo $cnsu | grep "$su")" ] ; then
 		[ "$t_installmode" == 'a' ] && Prompt 'startup_delay' "By default, \`start.sh\` will delay for 10 seconds prior to starting.${_nlsp}Some older/slower routers may require extra time." 'Enter the start-up delay [0-300]' '10' "^([0-9]|[1-9][0-9]|[1-2][0-9][0-9]|300)$"
 		SetupLog "Added $su to nvram-->rc_startup" 2
-		nvram set rc_startup="$cnsu
-sleep $startup_delay
-$su"
+		nvram set rc_startup="$cnsu $su"
 		nvram commit
 
 	else
