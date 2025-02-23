@@ -1,3 +1,4 @@
+#start-stop.sh
 ##########################################################################
 # Yet Another Monitor (YAMon)
 # Copyright (c) 2013-2024 Al Caughey
@@ -21,6 +22,7 @@
 #
 ##########################################################################
 Send2Log "start-stop" 1
+#_firmware=1
 
 if [ "$_firmware" -eq "0" ] ; then
 	cronJobsFile=/tmp/cron.d/yamon_jobs
@@ -49,14 +51,13 @@ StartScheduledJobs(){
 	        local _crds # timestamp for cronjob edits
 		local fileContents
 		local newjobs
-		set -x
 		fileContents=$(cat "$cronJobsFile")
                 _crds=$(date +"%Y-%m-%d--%H:%M")
 		# Stop adding double entry cronjobs - if/when $d_baseDir changes
 		# Comment out lines between "#Start of YAMon jobs" and "#End of YAMon jobs"
 		newjobs=`awk '/#Start of YAMon jobs/,/#End of YAMon jobs/ { sub(/^/, "#"); } { print }' <<< "$fileContents"`
 		# Filter out lines containing the current base directory or "YAMon jobs"
-		# ie:- remove clutter if $d_basDir does change
+		# ie:- remove clutter if $d_baseDir does change
 		newjobs=$(echo "$newjobs" | grep -v "${d_baseDir}"| grep -v "YAMon jobs")
 		newjobs="${newjobs}\n#Older duplicate YAMon jobs were replaced: (updated $_crds)"
 		local networkChecks=''
