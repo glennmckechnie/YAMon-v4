@@ -9,6 +9,7 @@
 # sets up iptables entries; crontab entries, etc.
 # run: /opt/YAMon4/start.sh
 # History
+# 2025-02: symlink yamon4.0.html to index.html
 # 2020-01-26: 4.0.7 - create tmpLastSeen if it does not exist; fixed users_created error
 #					- changed name of StartCronJobs to StartScheduledJobs (to better account for cron vs cru)
 #                   - add symlink for _wwwURL if it does not already exist
@@ -49,9 +50,11 @@ SetWebDirectories()
 		done
 	}
 	AddSoftLink(){
+	#set -v -x
 		Send2Log "AddSoftLink: $1 -> $2" 1
 		[ -h "$2" ] && rm -fv "$2"
 		ln -s "$1" "$2"
+	#set +v +x
 	}
 	Send2Log "SetWebDirectories" 1
 	[ -d "${_wwwPath}" ] || mkdir -p "${_wwwPath}"
@@ -64,6 +67,7 @@ SetWebDirectories()
 	AddSoftLink "${d_baseDir}/www/images" "${_wwwPath}images"
 	# add js path
 	AddSoftLink "${d_baseDir}/www/js" "${_wwwPath}js"
+	AddSoftLink "${d_baseDir}/www/yamon4.0.html" "${d_baseDir}/index.html"
 	[ "$_wwwData" == 'data3/' ] && _wwwData=''
 	AddSoftLink "${_path2data%/}" "${_wwwPath}${_wwwData:-data4}"
 	AddSoftLink "${_path2logs%/}" "${_wwwPath}logs"
