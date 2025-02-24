@@ -12,8 +12,12 @@ With the OpenWrt One router, you need to install the _iptables-legacy_ package. 
 After downloading the zip file, unpack it and rename the resulting directory to **YAMon4**. 
 Then **cd YAMon4** and run **install.sh**, which will then launch **setup4.0.7.sh** where you will populate the **config.file** and be given the option to start it.
 
-To start YAMon, execute the init script - _/etc/init.d/yamon4 (start | stop)_ or **bash start.sh reboot** 
+**Managing YAMon**
+
+To start YAMon, execute the init script - _/etc/init.d/yamon4 (start | stop)_ or **bash start.sh reboot** .
+
 To stop YAMon, execute **bash pause.sh** AND also stop the **cron** daemon; or inactivate the crontab entries
+
 To clear the iptables entries, run **clear-iptables.sh**
 
 Also... **pause.sh** now disables all YAMon4 cron entries. Hopefully this will reduce the data file corruption.
@@ -21,7 +25,8 @@ Also... **pause.sh** now disables all YAMon4 cron entries. Hopefully this will r
 It's worth noting that stopping cron from firing is the only way to stop YAMon4 properly.
 They are the daemons that control YAMon4.
 
- If they are enabled (via **start.sh reboot**) and cron is running the YAMon4 is running
+ If they are enabled (via **start.sh reboot**) and cron is running then YAMon4 is running.
+ 
  If they are disabled (via **pause.sh** ... or stopping cron) then YAMon4 is stopped.
 
 
