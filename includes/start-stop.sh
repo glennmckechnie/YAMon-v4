@@ -1,5 +1,5 @@
-#start-stop.sh
 ##########################################################################
+# start-stop.sh
 # Yet Another Monitor (YAMon)
 # Copyright (c) 2013-2024 Al Caughey
 # Copyright (c) 2025 Glenn McKechnie
@@ -22,7 +22,7 @@
 #
 ##########################################################################
 Send2Log "start-stop" 1
-#_firmware=1
+#set -v -x
 
 if [ "$_firmware" -eq "0" ] ; then
 	cronJobsFile=/tmp/cron.d/yamon_jobs
@@ -49,14 +49,13 @@ StartScheduledJobs(){
 	SetCronJobs(){ #for firmware using cron
 		touch "$cronJobsFile"
 	        local _crds # timestamp for cronjob edits
-		local fileContents
 		local newjobs
-		fileContents=$(cat "$cronJobsFile")
+		# FIXME change to tmp/file contents
                 _crds=$(date +"%Y-%m-%d--%H:%M")
 		# Stop adding double entry cronjobs - if/when $d_baseDir changes
 		# Comment out lines between "#Start of YAMon jobs" and "#End of YAMon jobs"
-		newjobs=`awk '/#Start of YAMon jobs/,/#End of YAMon jobs/ { sub(/^/, "#"); } { print }' <<< "$fileContents"`
-		# Filter out lines containing the current base directory or "YAMon jobs"
+		newjobs=$( awk '/#Start of YAMon jobs/,/#End of YAMon jobs/ { sub(/^/, "#"); } { print }' < $cronJobsFile)
+		# Also filter out any lines containing the current base directory or "YAMon jobs"
 		# ie:- remove clutter if $d_baseDir does change
 		newjobs=$(echo "$newjobs" | grep -v "${d_baseDir}"| grep -v "YAMon jobs")
 		newjobs="${newjobs}\n#Older duplicate YAMon jobs were replaced: (updated $_crds)"
@@ -66,7 +65,7 @@ StartScheduledJobs(){
 		fi
 		local user=''
 		[ "$_firmware" -eq "0" ] && user='root'
-		# add unique Start string
+		# add unique Start string and rebuild crontab entries
 		newjobs="${newjobs}\n#Start of YAMon jobs: (updated $_crds)"
 		newjobs="${newjobs}\n0 0 ${_ispBillingDay:-1} * * $user ${d_baseDir}/new-billing-interval.sh"
 		newjobs="${newjobs}\n59 * * * * $user ${d_baseDir}/end-of-hour.sh"
@@ -131,6 +130,7 @@ StartScheduledJobs(){
 	Send2Log "The YAMon jobs have been scheduled in \`$scheduler\`... run ${d_baseDir}/pause.sh to pause or stop the scripts" 99
 }
 StopScheduledJobs(){
+        # FIXME this appears to just stop the cron daemon, not each entry
 	StopCronJobs(){
 		nfc=""
 		local jobList=$(cat "$cronJobsFile")
@@ -216,3 +216,4 @@ SetAccessRestrictions(){
 		fi
 	done
 }
+# set +v +x

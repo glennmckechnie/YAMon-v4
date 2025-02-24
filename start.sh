@@ -51,31 +51,35 @@ SetWebDirectories()
 	}
 	AddSoftLink(){
 	#set -v -x
-		Send2Log "AddSoftLink: $1 -> $2" 1
+		Send2Log "AddSoftLink: ln -sfT $1 -> $2" 1
 		[ -h "$2" ] && rm -fv "$2"
-		ln -s "$1" "$2"
+		# stop creating recursive directories!
+		ln -sfT "$1" "$2"
 	#set +v +x
 	}
 	Send2Log "SetWebDirectories" 1
+	# _wwwURL:/yamon _wwwPath:/tmp/www _d_baseDir:/opt/YAMon4
 	[ -d "${_wwwPath}" ] || mkdir -p "${_wwwPath}"
 	# [ -d "${_wwwPath}js" ] || mkdir -p "${_wwwPath}js"
 	chmod -R a+rX "${_wwwPath}"
-	[ ! -h "/www${_wwwURL}" ] && ln -s "/tmp${_wwwURL}" "/www${_wwwURL}"
+	[ ! -h "/www${_wwwURL}" ] && AddSoftLink "${_wwwPath}" "/www${_wwwURL}"
 
-	ln -s /tmp/www /www/yamon
 	AddSoftLink "${d_baseDir}/www/css" "${_wwwPath}css"
 	AddSoftLink "${d_baseDir}/www/images" "${_wwwPath}images"
-	# add js path
+	# add js path using our local files
 	AddSoftLink "${d_baseDir}/www/js" "${_wwwPath}js"
-	AddSoftLink "${d_baseDir}/www/yamon4.0.html" "${d_baseDir}/index.html"
+	AddSoftLink "${d_baseDir}/www/yamon4.0.html" "${d_baseDir}/www/index.html"
 	[ "$_wwwData" == 'data3/' ] && _wwwData=''
 	AddSoftLink "${_path2data%/}" "${_wwwPath}${_wwwData:-data4}"
 	AddSoftLink "${_path2logs%/}" "${_wwwPath}logs"
 	AddSoftLink "$tmplogFile" "${_wwwPath}logs/latest-log.html"
 	AddSoftLink "${_path2logs%/}/${_ds}.html" "${_wwwPath}logs/day-log.html"
+	#FIXME
 	AddSoftLink "${d_baseDir}/www/yamon${_version%\.*}.html" "${_wwwPath}${_webIndex:-index.html}"
 	
 	WriteConfigFile
+	set +v +x
+	# sleep 30
 }
 
 d_baseDir=$(cd "$(dirname "$0")" && pwd)
