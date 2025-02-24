@@ -1,8 +1,23 @@
 # YAMon-v4
-** 2025-02-24**
-Fix a couple of show stopping bugs.
 
-===========
+**2025-02-24**
+
+Fixed a couple of show stopping bugs, both existing and mine! 
+
+And... after dogfooding it on an  **Openrt One** unit I can say that it does work. 
+
+It's still a little messy to get up and running and the **validation.sh** script is still your friend - run it after the setup script is finished.
+With the OpenWrt One router, you need to install the _iptables-legacy_ package. I installed **bash** but that's probably not essential.
+
+After downloading the zip file, unpack it and rename the resulting directory to **YAMon4**. 
+Then **cd YAMon4** and run **install.sh**, which will then launch **setup4.0.7.sh** where you will populate the **config.file** and be given the option to start it.
+
+To start YAMon, execute the init script - _/etc/init.d/yamon4 (start | stop)_ or **bash start.sh reboot** 
+To stop YAMon, execute **bash pause.sh** AND also stop the **cron** daemon; or inactivate the crontab entries
+To clear the iptables entries, run **clear-iptables.sh**
+
+
+<hr>
 
 YA Fork of YAMon v4 !
 
