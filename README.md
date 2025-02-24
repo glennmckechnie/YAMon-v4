@@ -1,4 +1,9 @@
 # YAMon-v4
+** 2025-02-24**
+Fix a couple of show stopping bugs.
+
+===========
+
 YA Fork of YAMon v4 !
 
 Welcome to this Github YAMon (unofficial) fork
