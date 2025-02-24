@@ -8,6 +8,10 @@
 # script to enable/disable entries in /etc/crontabs
 # run: /opt/YAMon4/start.sh
 # History
+# 2025-02-24: GMcK
+#   Replace StopCronJobs: entries are commented out and will be re-enabled on a
+#   start.sh reboot. No need to stop cron. Hopefully this will reduce the file
+#   data corruption.
 # 2025-02-21: GMcK
 #   Only add one YAMoN cron group - if d_baseDir changed they would be orphaned
 #   Data could be corrupted
@@ -50,7 +54,6 @@ StartScheduledJobs(){
 		touch "$cronJobsFile"
 	        local _crds # timestamp for cronjob edits
 		local newjobs
-		# FIXME change to tmp/file contents
                 _crds=$(date +"%Y-%m-%d--%H:%M")
 		# Stop adding double entry cronjobs - if/when $d_baseDir changes
 		# Comment out lines between "#Start of YAMon jobs" and "#End of YAMon jobs"
@@ -86,9 +89,7 @@ StartScheduledJobs(){
 		[ "$_doLiveUpdates" -eq "1" ] && newjobs="${newjobs}\n* * * * * $user ${d_baseDir}/update-live-data.sh"
 		local udt=${_updateTraffic:-4}
 		newjobs="${newjobs}\n$udt-$((60 - $udt))/$udt * * * * $user ${d_baseDir}/update-reports.sh"
-		# line below is seemingly not a reliable as the one above?!?
-		#newjobs="${newjobs}\n*${networkChecks} * * * * $user ${d_baseDir}/check-network.sh"
-		# add unique End string
+		# finish with a unique End string
 		newjobs="${newjobs}\n#End of YAMon jobs: (updated $_crds)"
 		
 		echo -e "$newjobs" > "$cronJobsFile"
@@ -130,8 +131,18 @@ StartScheduledJobs(){
 	Send2Log "The YAMon jobs have been scheduled in \`$scheduler\`... run ${d_baseDir}/pause.sh to pause or stop the scripts" 99
 }
 StopScheduledJobs(){
-        # FIXME this appears to just stop the cron daemon, not each entry
 	StopCronJobs(){
+	        local _crds # timestamp for cronjob edits
+		local newjobs
+                _crds=$(date +"%Y-%m-%d--%H:%M")
+		# comment out current YAMon entries
+		newjobs=$( awk '/#Start of YAMon jobs/,/#End of YAMon jobs/ { sub(/^/, "#"); } { print }' < $cronJobsFile)
+		newjobs="${newjobs}\n#Stopping YAMon jobs: (updated $_crds)"
+		echo -e "$newjobs" > "$cronJobsFile"
+		Send2Log "StopCronJobs by disabling YAMon entries: $(IndentList "$nfc")" 1
+	}
+        # FIXME this appears to just stop the cron daemon, not each entry. Now replaced with ^^^^^.
+	Disabled_StopCronJobs(){
 		nfc=""
 		local jobList=$(cat "$cronJobsFile")
 		IFS=$'\n'

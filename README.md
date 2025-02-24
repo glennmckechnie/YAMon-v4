@@ -16,6 +16,14 @@ To start YAMon, execute the init script - _/etc/init.d/yamon4 (start | stop)_ or
 To stop YAMon, execute **bash pause.sh** AND also stop the **cron** daemon; or inactivate the crontab entries
 To clear the iptables entries, run **clear-iptables.sh**
 
+Also... **pause.sh** now disables all YAMon4 cron entries. Hopefully this will reduce the data file corruption.
+
+It's worth noting that stopping cron from firing is the only way to stop YAMon4 properly.
+They are the daemons that control YAMon4.
+
+ If they are enabled (via **start.sh reboot**) and cron is running the YAMon4 is running
+ If they are disabled (via **pause.sh** ... or stopping cron) then YAMon4 is stopped.
+
 
 <hr>
 
