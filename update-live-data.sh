@@ -1,5 +1,4 @@
 #!/bin/sh
-
 ##########################################################################
 # Yet Another Monitor (YAMon)
 # Copyright (c) 2013-present Al Caughey
@@ -29,7 +28,6 @@ CurrentConnections_0()
 
 CurrentConnections_1()
 { #_doCurrConnections=1
-
 	IP6Enabled(){
 		echo "$(ip6tables -L "$YAMON_IPTABLES" "$vnx" | grep -v RETURN | awk '{ print $2,$7,$8 }' | grep "^[1-9]")"
 	}
@@ -90,7 +88,9 @@ CurrentConnections_1()
 	local err=$(echo "${ddd%,}]" 2>&1 1>> $_liveFilePath)
 	#Send2Log "curr_connections >>>\n$ddd" 0
 	[ -n "$err" ] && Send2Log "ERROR >>> doliveUpdates:  $(IndentList "$err")" 3
-	$doArchiveLiveUpdates
+	#FIXME old debug code??? sh hates it, bash ignores it!
+	# sh: invalid number ''
+	# $doArchiveLiveUpdates
 }
 
 loads=$(cat /proc/loadavg | cut -d' ' -f1,2,3 | tr -s ' ' ',')
