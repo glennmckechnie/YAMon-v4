@@ -1,11 +1,14 @@
+#!/bin/sh
 ##########################################################################
 # Yet Another Monitor (YAMon)
 # Copyright (c) 2013-present Al Caughey
+# Copyright (c) 2025 Glenn McKechnie
 # All rights reserved.
 #
 # various utility functions (shared between one or more scripts)
 #
 # History
+# 2025-02-26: refine,fix typo in var length test.
 # 2020-03-19: 4.0.7 - added static leases for Tomato (thx tvlz)
 #                   - added wait option ( -w -W1) to commands that add entries in iptables
 #                   - then added _iptablesWait 'cause not all firmware variants support iptables -w...
@@ -20,6 +23,8 @@
 
 _ds=$(date +"%Y-%m-%d")
 _ts=$(date +"%T")
+
+
 _generic_mac="un:kn:ow:n0:0m:ac"
 
 source "${d_baseDir}/includes/version.sh"
@@ -471,11 +476,12 @@ AddActiveDevices(){
 
 DigitAdd()
 {
-	Send2Log "DigitAdd - $1 & $2"
 	local n1=${1:-0}
 	local n2=${2:-0}
-	if [ "${#n1}" -lt "${_max_digits:-12}" ] && [ "${#n1}" -lt "${_max_digits:-12}" ] ; then
+	local max_digits=${_max_digits:-12}
+	if [ "${#n1}" -lt "$max_digits" ] && [ "${#n2}" -lt "$max_digits" ] ; then
 		echo $(($n1+$n2))
+		Send2Log "DigitAdd: $1 + $2 = $total"
 		return
 	fi
 	local l1=${#n1}
@@ -496,7 +502,7 @@ DigitAdd()
 	done
 	[ "$carry" -eq "1" ] && total="$carry$total"
 	echo ${total:-0}
-	Send2Log "DigitAdd: $1 + $2 = $total"
+	Send2Log "Large number DigitAdd: $1 + $2 = $total"
 }
 CheckIntervalFiles(){
 # create the data directory
