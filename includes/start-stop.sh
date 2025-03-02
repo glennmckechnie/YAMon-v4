@@ -148,7 +148,7 @@ StopScheduledJobs(){
 		IFS=$'\n'
 		for job in $jobList
 		do
-			[ ! -z $(echo "$line" | grep "$d_baseDir" | grep -v '^##') ] && line="## $job"
+			[ ! -z $(echo "$job" | grep "$d_baseDir" | grep -v '^##') ] && job="## $job"
 			[ -z $nfc ] && nfc="$job" && continue
 			nfc="$nfc\n$job"
 		done
