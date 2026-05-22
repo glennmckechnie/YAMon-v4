@@ -22,7 +22,7 @@ d_baseDir=$(cd "$(dirname "$0")" && pwd)
 source "${d_baseDir}/config.file"
 source "${d_baseDir}/includes/paths.sh"
 
-vl="${tmplog}validation.log"
+vl="${tmplog}validation-${1}-$(date +%Y%m%d%H%M%S).log"
 [ -f "$vl" ] && rm "$vl"
 touch "$vl"
 
