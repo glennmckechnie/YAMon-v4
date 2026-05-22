@@ -11,6 +11,7 @@
 # values generated during setup & verified on startup or on demand
 # run: /opt/YAMon4/setPaths.sh
 # History
+# 2026-05-22: 4.0.8 - no changes
 # 2025-02-22: remove deprecated '-w -W1' from OpenWrt entry
 # 2020-01-26: 4.0.7 - removed routerfile entry from paths (as no longer used); added defensive default when checking if IPv6 is enabled
 #                   - added another check for ipv6Enabled & static leases for Tomato (thx tvlz); combined AsusMerlin & Tomato entries

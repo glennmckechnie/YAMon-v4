@@ -8,6 +8,7 @@
 # Run - manually from calculate-daily-totals or by cron from end-of-day
 #
 # History
+# 2026-05-22: 4.0.8 - no changes
 # 2020-01-26: 4.0.7 - no changes
 # 2020-01-03: 4.0.6 - replaced all non-alpha chars with _ in t_interfaces (rather than just -) in CalculateInterfaceTotals
 # 2019-12-23: 4.0.5 - added CalculateInterfaceTotals; removed brace brackets around memory

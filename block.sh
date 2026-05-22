@@ -8,6 +8,7 @@
 # utility functions used by install and setup
 #
 # History
+# 2026-05-22: 4.0.8 - no changes
 # 2020-01-26: 4.0.7 - replaced hard coded paths (thx tvlz)
 # 2020-01-03: 4.0.6 - tweaks for dd-wrt; checking if chain exists
 # 2019-12-23: 4.0.5 - updates to allow for blocking duration and IPv6

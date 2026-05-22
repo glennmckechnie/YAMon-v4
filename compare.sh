@@ -8,6 +8,7 @@
 # compares files on the router with those at https://usage-monitoring.com
 # run: manually and by install
 # History
+# 2026-05-22: 4.0.8 - no changes
 # 2020-01-26: 4.0.7 - auto-change windows linefeeds to unix
 # 2020-01-03: 4.0.6 - removed the sleep statements; updated formatting of output; strip latest history comment to improve matches
 # 2019-12-23: 4.0.5 - no changes

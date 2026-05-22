@@ -9,6 +9,7 @@
 # sets up iptables entries; crontab entries, etc.
 # run: /opt/YAMon4/start.sh
 # History
+# 2026-05-22: 4.0.8 - no changes
 # 2026-05-19: rejig AddSoftLink to ignore existing directories as well as deal with existing symlinks
 # 2025-02: symlink yamon4.0.html to index.html
 # 2020-01-26: 4.0.7 - create tmpLastSeen if it does not exist; fixed users_created error

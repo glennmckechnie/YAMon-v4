@@ -137,4 +137,4 @@ those md5sum checks.  Rest assured they are good!
 	"
 sleep 5
 #[ ! -z "$bCanClear" ] && clear
-source "${YAMON}setup4.0.7.sh"
+source "${YAMON}setup4.0.8.sh"

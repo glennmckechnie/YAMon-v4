@@ -6,6 +6,7 @@
 # utility functions used by install and setup
 #
 # History
+# 2026-05-22: 4.0.8 - no changes
 # 2020-01-26: 4.0.7 - no changes
 # 2020-01-03: 4.0.6 - added pad_length in UpdateConfig
 # 2019-12-23: 4.0.5 - removed extra space before # Added in UpdateConfig()

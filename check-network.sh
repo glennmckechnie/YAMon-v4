@@ -8,6 +8,7 @@
 # checks arp & ip for new devices and/or ip changes on the network
 # run: by cron
 # History
+# 2026-05-22: 4.0.8 - no changes
 # 2020-03-20: 4.0.8 - from 4.0.8 ---  for mac addresses to lowercase
 # 2020-01-26: 4.0.7 - added check for error in Check4UpdatesInReports results
 #                   - moved GetDeviceGroup to shared.sh

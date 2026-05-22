@@ -8,6 +8,7 @@
 # various utility functions (shared between one or more scripts)
 #
 # History
+# 2026-05-22: 4.0.8 - no changes
 # 2025-02-26: refine,fix typo in var length test.
 # 2020-03-19: 4.0.7 - added static leases for Tomato (thx tvlz)
 #                   - added wait option ( -w -W1) to commands that add entries in iptables

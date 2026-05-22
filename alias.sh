@@ -7,6 +7,7 @@
 # some useful aliases and shortcuts
 # run: manually
 # History
+# 2026-05-22: 4.0.8 - no changes
 # 2020-01-26: 4.0.7 - replaced hard coded paths (thx tvlz)
 # 2020-01-03: 4.0.6 - added fix (to launch run-fixes.sh)
 # 2019-12-23: 4.0.5 - added blocked alias; separated block & unblock; added duration option to block and unblock; added syntax description and rudimentary error trapping for group name

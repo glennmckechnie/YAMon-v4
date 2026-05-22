@@ -8,6 +8,7 @@
 # script to enable/disable entries in /etc/crontabs
 # run: /opt/YAMon4/start.sh
 # History
+# 2026-05-22: 4.0.8 - no changes
 # 2025-02-24: GMcK
 #   Replace StopCronJobs: entries are commented out and will be re-enabled on a
 #   start.sh reboot. No need to stop cron. Hopefully this will reduce the file

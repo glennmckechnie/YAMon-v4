@@ -6,6 +6,7 @@
 # functions to define chains in iptables & optionally ip6tables
 #
 # History
+# 2026-05-22: 4.0.8 - no changes
 # 2020-03-20: 4.0.7 - added wait option ( -w -W1) to commands that add entries in iptables; 
 #                   - then added _iptablesWait 'cause not all firmware variants support iptables -w...
 # 2020-01-03: 4.0.6 - added check for _logNoMatchingMac in SetupIPChains

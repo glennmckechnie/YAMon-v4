@@ -6,6 +6,7 @@
 # various fixed to data files as issues are discovered during beta
 #
 # History
+# 2026-05-22: 4.0.8 - no changes
 # 2020-03-19: 4.0.7 - properly renames previously copied v3 hourly & monthly data files
 # 2020-01-03: 4.0.6 - no changes
 # 2019-12-23: 4.0.5 - no changes
