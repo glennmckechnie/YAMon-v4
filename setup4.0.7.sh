@@ -11,6 +11,8 @@
 ##########################################################################
 
 # History
+# 2026-05-22: redo symlink generation, in particular for the yamon www directory
+#   also add validator calls and backup script for volatile directories.
 # 2025-02: change unused $d_www_Path to $_wwwPath, remove errant sleep call
 #   (probably a cut n paste slip up), retire database question (wrap it in
 #   an ununused function.
@@ -208,6 +210,8 @@ https://usage-monitoring.com/help/?t=export-users
 For more help with the installation process, see
     https://usage-monitoring.com/help/?c=Install
 "
+#${d_baseDir}/backupYAMon4.sh
+
 sleep $delay
 [ -n "$_canClear" ] && clear
 
@@ -558,8 +562,7 @@ else
 #set -v -x
 	if [ "$_firmware" == "1" ] && [ -d '/www' ] ; then
 	     # specifically for an 'openwrt one'
-	     ln -s ${d_baseDir}/www ${_wwwPath%/}
-	     ln -s ${_wwwPath} /www${_wwwURL}
+	     ln -sf -- "${_wwwPath}" "/www${_wwwURL}"
         fi
 #set +v +x
 	Prompt '_includeBridge' "Do you have a bridge on your network?${_nlsp}(i.e., a second router or other device to extend the wireless range)" "$yn_n" '0' $zo_r
@@ -728,6 +731,8 @@ if [ "$_firmware" == "6" ] ; then
 	fi
 fi
 
+${d_baseDir}/validate.sh setup-completed
+
 echo -e "${_nl}${los}${_nl}Setup is (finally) complete!!!
 
 One last thing to do before restarting the new version... 
@@ -740,11 +745,14 @@ if [ "$t_fix" == "1" ] ; then
 	source "${d_baseDir}/includes/fixes.sh"
 fi
 
+
 Prompt 't_launch' 'Do you want to launch YAMon now?' "$yn_y" '1' $zo_r
 if [ "$t_launch" == "1" ] ; then
 	SetupLog "Launched " 2
 	echo -e "${_nl}${los}${_nl}[Re]starting YAMon$_version${_nl}"
+echo -e "	${d_baseDir}/start.sh"
 	${d_baseDir}/start.sh
+	${d_baseDir}/validate.sh setup-start
 	exit 0
 fi
 

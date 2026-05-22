@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # start.sh
 
 ##########################################################################
@@ -9,9 +9,10 @@
 # sets up iptables entries; crontab entries, etc.
 # run: /opt/YAMon4/start.sh
 # History
+# 2026-05-19: rejig AddSoftLink to ignore existing directories as well as deal with existing symlinks
 # 2025-02: symlink yamon4.0.html to index.html
 # 2020-01-26: 4.0.7 - create tmpLastSeen if it does not exist; fixed users_created error
-#					- changed name of StartCronJobs to StartScheduledJobs (to better account for cron vs cru)
+#                   - changed name of StartCronJobs to StartScheduledJobs (to better account for cron vs cru)
 #                   - add symlink for _wwwURL if it does not already exist
 # 2020-01-03: 4.0.6 - added logging to WriteConfigFile; changed logic to create js directory in SetWebDirectories
 # 2019-12-23: 4.0.5 - added symlink for latest-log & day-log
@@ -50,19 +51,24 @@ SetWebDirectories()
 		done
 	}
 	AddSoftLink(){
-	#set -v -x
-		Send2Log "AddSoftLink: ln -sfT $1 -> $2" 1
-		[ -h "$2" ] && rm -fv "$2"
-		# stop creating recursive directories!
-		ln -sfT "$1" "$2"
-	#set +v +x
+		Send2Log "AddSoftLink: ln -sf $1 -> $2" 1
+		# stop creating recursive directories! and move on if it is a directory.
+		# also redo the www link - regardless
+		if [ "$2" = "/www${_wwwURL}" ]; then
+			[ -L "$2" ] && rm -fv -- "$2"
+			ln -sf -- "$1" "$2"
+		elif [ ! -d "$2" ]; then
+			[ -L "$2" ] && rm -fv -- "$2"
+			ln -sf -- "$1" "$2"
+		fi
 	}
 	Send2Log "SetWebDirectories" 1
 	# _wwwURL:/yamon _wwwPath:/tmp/www _d_baseDir:/opt/YAMon4
 	[ -d "${_wwwPath}" ] || mkdir -p "${_wwwPath}"
 	# [ -d "${_wwwPath}js" ] || mkdir -p "${_wwwPath}js"
 	chmod -R a+rX "${_wwwPath}"
-	[ ! -h "/www${_wwwURL}" ] && AddSoftLink "${_wwwPath}" "/www${_wwwURL}"
+	#FIXME
+	AddSoftLink "${_wwwPath}" "/www${_wwwURL}"
 
 	AddSoftLink "${d_baseDir}/www/css" "${_wwwPath}css"
 	AddSoftLink "${d_baseDir}/www/images" "${_wwwPath}images"
