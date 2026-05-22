@@ -1,5 +1,8 @@
 # YAMon-v4
+**2026-05-22**
 
+  Attempt 2 at fixes for missing web symlinks. Additions to aid debugging. Bump version to **YAMon4-0.8** as there have been enough incremental improvements to warrant drawing a line in the sand.
+  
 **2025-02-24**
 
 Fixed a couple of show stopping bugs, both existing and mine! 
