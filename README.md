@@ -13,7 +13,7 @@ It's still a little messy to get up and running and the **validation.sh** script
 With the OpenWrt One router, you need to install the _iptables-legacy_ package. I installed **bash** but that's probably not essential.
 
 After downloading the zip file, unpack it and rename the resulting directory to **YAMon4**. 
-Then **cd YAMon4** and run **install.sh**, which will then launch **setup4.0.7.sh** where you will populate the **config.file** and be given the option to start it.
+Then **cd YAMon4** and run **install.sh**, which will then launch **setup4.0.8.sh** where you will populate the **config.file** and be given the option to start it.
 
 **Managing YAMon**
 
