@@ -186,7 +186,7 @@ StopScheduledJobs(){
 	_backup="${d_baseDir}/data/yamon-$(date +%Y%m%d)"
 	[ -d "${_backup}" ] || mkdir -p "${_backup}"
 	cp -af "${tmplog}/." "${_backup}/"
-	Send2log "Created copy of current files in $_backup"
+	Send2Log "Created copy of current files in $_backup"
 }
 SetAccessRestrictions(){
 	local fileContents=$(cat "$cronJobsFile")

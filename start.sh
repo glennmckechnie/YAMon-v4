@@ -152,9 +152,9 @@ _backup=${d_baseDir}/data/yamon-$(date +%Y%m%d)
 
 if [ -d "${_backup}" ] ; then
 	cp -af "${_backup}/." "$tmplog/"
-	Send2log "Copied contents of ${_backup} back to $tmplog"
+	Send2Log "Copied contents of ${_backup} back to $tmplog"
 else
-	Send2log "Nothing to restore ${_backup}: doesn't exist"
+	Send2Log "Nothing to restore ${_backup}: doesn't exist"
 fi
 
 "${d_baseDir}/new-day.sh"
