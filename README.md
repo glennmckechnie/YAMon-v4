@@ -1,6 +1,14 @@
 # YAMon-v4
 **2026-05-22**
 
+Added a backup and restore routines into the scripts (**start.sh**, and **pause** which calls includes/start-stop.sh ). Those files are called by the init.d script. They will now copy/restore the contents of /tmp/yamon between restarts. The actual data copied is stored in a dated directory of the style **/opt/YAMon4/data/yamon-YYYYMMDD**.
+
+If you don't inoke the yamon init.d script, nothing will happen except holes in the data, and some frustration.
+This also doesn't save data from a system crash, but if a cronjob was setup then there would always be a copy on hand. Your machine, your choice. 
+Deletion of those stale directories will be a FIXME issue - later.
+
+**2026-05-22**
+
   Attempt 2 at fixes for missing web symlinks. Additions to aid debugging. Bump version to **YAMon4-0.8** as there have been enough incremental improvements to warrant drawing a line in the sand.
   
 **2025-02-24**
