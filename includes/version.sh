@@ -14,4 +14,4 @@
 # 2019-10-30: updated to version 4.0.1
 # 2019-08-15: updated to version 4
 
-_version='4.0.7'
+_version='4.0.8'
