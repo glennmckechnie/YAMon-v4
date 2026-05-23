@@ -8,7 +8,7 @@
 # script to enable/disable entries in /etc/crontabs
 # run: /opt/YAMon4/start.sh
 # History
-# 2026-05-22: 4.0.8 - no changes
+# 2026-05-22: added backup recovery routine (see start.sh)
 # 2025-02-24: GMcK
 #   Replace StopCronJobs: entries are commented out and will be re-enabled on a
 #   start.sh reboot. No need to stop cron. Hopefully this will reduce the file
@@ -26,6 +26,7 @@
 # 2019-06-18: development starts on initial v4 release
 #
 ##########################################################################
+
 Send2Log "start-stop" 1
 #set -v -x
 
@@ -180,6 +181,12 @@ StopScheduledJobs(){
 		StopCronJobs
 	fi
 	Send2Log "The YAMon jobs in \`$scheduler\` have been paused... run ${d_baseDir}/start.sh to restart the scripts" 99
+
+	# make a backup of the existing data
+	_backup="${d_baseDir}/data/yamon-$(date +%Y%m%d)"
+	[ -d "${_backup}" ] || mkdir -p "${_backup}"
+	cp -af "${tmplog}/." "${_backup}/"
+	Send2log "Created copy of current files in $_backup"
 }
 SetAccessRestrictions(){
 	local fileContents=$(cat "$cronJobsFile")

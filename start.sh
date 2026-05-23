@@ -9,7 +9,7 @@
 # sets up iptables entries; crontab entries, etc.
 # run: /opt/YAMon4/start.sh
 # History
-# 2026-05-22: 4.0.8 - no changes
+# 2026-05-22: 4.0.8 - added backup recovery routine (see includes/start-stop.sh)
 # 2026-05-19: rejig AddSoftLink to ignore existing directories as well as deal with existing symlinks
 # 2025-02: symlink yamon4.0.html to index.html
 # 2020-01-26: 4.0.7 - create tmpLastSeen if it does not exist; fixed users_created error
@@ -146,6 +146,16 @@ AddNetworkInterfaces # in /includes/setupIPChains.sh
 
 AddActiveDevices
 SetWebDirectories
+
+# restore any existing and current backup files
+_backup=${d_baseDir}/data/yamon-$(date +%Y%m%d)
+
+if [ -d "${_backup}" ] ; then
+	cp -af "${_backup}/." "$tmplog/"
+	Send2log "Copied contents of ${_backup} back to $tmplog"
+else
+	Send2log "Nothing to restore ${_backup}: doesn't exist"
+fi
 
 "${d_baseDir}/new-day.sh"
 "${d_baseDir}/new-hour.sh"
