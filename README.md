@@ -1,4 +1,10 @@
 # YAMon-v4
+**2026-05-26**
+
+Fix the timing of calls, and variables, so that the local java script files in the main html page can work as expected. Speed has improved, graph display, and hopefully a few of the other display errors will disappear. There are still a few subtle annoyances from the usage.monitor code but local *.js are now working - fully.
+To use the local javascript files then the tick box in Settings, "Use this servers JS & CSS files", ie:- (dev) should be ticked.
+Unticked goes to the usage.monitoring files.
+
 **2026-05-22**
 
 Added a backup and restore routines into the scripts (**start.sh**, and **pause** which calls includes/start-stop.sh ). Those files are called by the init.d script. They will now copy/restore the contents of /tmp/yamon between restarts. The actual data copied is stored in a dated directory of the style **/opt/YAMon4/data/yamon-YYYYMMDD**.
