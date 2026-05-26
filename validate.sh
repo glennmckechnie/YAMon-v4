@@ -18,12 +18,13 @@ LS_Path(){
 	ls -la ${tp} | grep -v "\.$" >> $vl
 }
 
+_action="${1:-txt}"
 tmplog='/tmp/yamon/'
 d_baseDir=$(cd "$(dirname "$0")" && pwd)
 source "${d_baseDir}/config.file"
 source "${d_baseDir}/includes/paths.sh"
 
-vl="${tmplog}validation-${1}-$(date +%Y%m%d%H%M%S).log"
+vl="${tmplog}validation-${_action}-$(date +%Y%m%d%H%M%S).log"
 [ -f "$vl" ] && rm "$vl"
 touch "$vl"
 
