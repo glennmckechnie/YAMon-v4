@@ -12,40 +12,78 @@
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 		<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
 		<script defer type="text/javascript">
-			var _html_version='4.0'
-			var _file_version='4.0'
-			var args=window.location.search.replace('?','').split('&'),ver=args[1]||_file_version,domain='',path=''
-			if(!(localStorage.getItem('devOrCurr')==='dev')){
-				path = (localStorage.getItem('devOrCurr') || 'current') + '/'
-				domain='https://usage-monitoring.com/'
-			}
-			$("<link/>", {rel: "stylesheet", type: "text/css", href: domain + path + 'css/normalize.css'}).appendTo("head");
-			$("<link/>", {rel: "stylesheet", type: "text/css", href: domain + path + 'css/yamon' + ver + '.css'}).appendTo("head");
-			$("<link/>", {rel: "shortcut icon",href: domain + path + 'images/favicon.png'}).appendTo("head");
-			$.ajax({url: domain + path + 'js/jquery.md5.min.js', dataType: "script"});
-		</script>
-		<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-		<script type="text/javascript">
-			google.charts.load('current', {packages: ['corechart']});
-		</script>
-		<script defer type="text/javascript">
-			if(!localStorage.getItem('ajaxCache')) localStorage.setItem('ajaxCache', 'true')
-			$.ajaxSetup({'cache':localStorage.getItem('ajaxCache')=='true'});  //Comment out this line if your router requires timestamps appended to data URLs
-			google.charts.load('current', {'packages':['corechart', 'gauge']});
-			$(document).ready(function(){
-				$.ajax({crossDomain: true, url: domain + path + 'js/util' + ver+ '.js',dataType: "script", cache:false})
-					.done(function(){
-						$.ajax({crossDomain: true, url: domain + path + 'js/yamon' + ver+ '.js',dataType: "script", cache:false});
-					});
-			})
-			console.log("domain is:",domain)
-			console.log("path is", path)
-			console.log("devOrCurr is ",localStorage.getItem("devOrCurr"))
-			//console.log("doLocalFiles is ",localStorage.getItem("doLocalFiles"))
-			console.log("ajaxCache is ",localStorage.getItem("ajaxCache"))
-			console.log("show-isp-out is :", localStorage.getItem("show-isp-out"))
-		</script>
-
+			(function(){
+			// set default
+			 (function(){
+			 var key = 'devOrCurr';
+			 try {
+			 if (localStorage.getItem(key) === null) {
+			 // set default: use 'dev' or 'current' or 'staging' as you prefer
+			 localStorage.setItem(key, 'dev'); // <-- change 'dev' to your desired default
+			 }
+			 } catch (e) {
+			 // localStorage unavailable (private mode, etc.) — ignore silently
+			  }
+			  })();
+			  // preserve existing arg/localStorage logic
+			  var args = window.location.search.replace('?','').split('&'), ver = args[1] || _file_version, domain = '', path = '';
+			  if (!(localStorage.getItem('devOrCurr') === 'dev')) {
+			    path = (localStorage.getItem('devOrCurr') || 'current') + '/';
+			    domain = 'https://usage-monitoring.com/';
+			  }
+			  // expose globals so loaded scripts can access them synchronously
+			  window.domain = domain || '';
+			  window.path = path || '';
+			  window._file_version = typeof _file_version !== 'undefined' ? _file_version : (ver || '');
+			  // inject styles and favicon (unchanged behavior)
+			  $("<link/>", { rel: "stylesheet", type: "text/css", href: domain + path + 'css/normalize.css' }).appendTo("head");
+			  $("<link/>", { rel: "stylesheet", type: "text/css", href: domain + path + 'css/yamon' + ver + '.css' }).appendTo("head");
+			  $("<link/>", { rel: "shortcut icon", href: domain + path + 'images/favicon.png' }).appendTo("head");
+			  // Promise-based loader for scripts
+			  function loadScript(url, opts) {
+			    opts = opts || {};
+			    return new Promise(function(resolve, reject){
+			      var s = document.createElement('script');
+			      s.src = url;
+			      if (opts.async === false) s.async = false;
+			      s.onload = function(){ resolve(url); };
+			      s.onerror = function(){ reject(new Error('Failed to load ' + url)); };
+			      document.head.appendChild(s);
+			    });
+			  }
+			  // ensure ajax cache setting still applied
+			  if (!localStorage.getItem('ajaxCache')) localStorage.setItem('ajaxCache', 'true');
+			  $.ajaxSetup({ 'cache': localStorage.getItem('ajaxCache') == 'true' });
+			  // load jquery.md5 first (was previously ajax; keep same file but ensure completion)
+			  var md5url = domain + path + 'js/jquery.md5.min.js';
+			  // Load google loader, then call google.charts.load once, wait until charts ready,
+			  // then load local util and yamon in sequence.
+			  var loaderUrl = 'https://www.gstatic.com/charts/loader.js';
+			  var utilUrl = domain + path + 'js/util' + ver + '.js';
+			  var yamonUrl = domain + path + 'js/yamon' + ver + '.js';
+			  // Start sequence
+			  Promise.resolve()
+			    // load md5 (if required)
+			    .then(function(){ return loadScript(md5url).catch(function(){ /* non-fatal */ }); })
+			    // load google loader
+			    .then(function(){ return loadScript(loaderUrl); })
+			    // call google.charts.load exactly once for needed packages
+			    .then(function(){
+			      // Use a single load call for both packages
+			      google.charts.load('current', { packages: ['corechart', 'gauge'] });
+			      // Wait for google charts to be ready
+			      return new Promise(function(res){
+			        google.charts.setOnLoadCallback(res);
+			      });
+			    })
+			    // load util then yamon sequentially
+			    .then(function(){ return loadScript(utilUrl); })
+			    .then(function(){ return loadScript(yamonUrl); })
+			    .catch(function(err){
+			      console.error('script load sequence error:', err);
+			    });
+			})();
+			</script>
 		<link rel="stylesheet" type="text/css" href="css/custom.css"/>
 	</head>
 	<body>
@@ -87,13 +125,13 @@
 			</section>
 			<section id='main-body' class='p-r'>
 				<div class='_detanod' amount=20 title='Thank you in advance for your support!'>
-					<div class='submenu'>
+					<!--div class='submenu'>
 						<span class='amount btn' amount=10 title='Donate $10'>$10</span>
 						<span class='amount btn' amount=15 title='Donate $15'>$15</span>
 						<span class='amount btn' amount=20 title='Donate $20... thanks!'>$20</span>
 						<span class='amount btn' amount=25 title='Donate $25 - wow!!!'>$25</span>
 						<span class='amount btn' amount='' title='Select this option to choose your own amount'>Other...</span>
-					</div>
+					</div -->
 				</div>
 				<div id='error-notification' class='p-r'>
 					<h1>This text will go away once all of the data has loaded.</h1>
