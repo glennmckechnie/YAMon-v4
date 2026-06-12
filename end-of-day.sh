@@ -22,7 +22,7 @@ DeactiveIdleDevices(){
 	local lastseen=''
 	[ -f "$_lastSeenFile" ] && lastseen=$(cat "$_lastSeenFile" | grep -e "^lastseen({.*})$")
 	IFS=$'\n'
-	Send2Log "DeactiveIdleDevices - _activeIPs"
+	Send2Log "DeactiveIdleDevices - _activeIPs" 0 "${0##$d_baseDir/} : DeactiveIdleDevices : Line Number-${LINENO}"
 	for line in $_activeIPs 
 	do	
 		[ -z "$line" ] && continue
@@ -33,15 +33,15 @@ DeactiveIdleDevices(){
 			newline=$(echo "${line/\"active\":\"1\"/\"active\":\"0\"}")
 			sed -i "s~$line~$newline~" "$_usersFile"
 			#To Do... cull the inactive entries from iptables?!?
-			Send2Log "DeactiveIdleDevices: $id set to inactive (based upon users.js)" 1
+			Send2Log "DeactiveIdleDevices: $id set to inactive (based upon users.js)" 1 "${0##$d_baseDir/} : DeactiveIdleDevices : Line Number-${LINENO}"
 			local changes1=1
 		fi
 	done
-	[ -z "$changes1" ] && Send2Log "DeactiveIdleDevices: no active devices deactivated" 
+	[ -z "$changes1" ] && Send2Log "DeactiveIdleDevices: no active devices deactivated" 0 "${0##$d_baseDir/} : DeactiveIdleDevices : Line Number-${LINENO}"
 
 	local _inActiveIPs=$(cat "$_usersFile" | grep -e "^mac2ip({.*})$" | grep '"active":"0"')
 
-	Send2Log "DeactiveIdleDevices - lastseen"
+	Send2Log "DeactiveIdleDevices - lastseen" 0 "${0##$d_baseDir/} : DeactiveIdleDevices : Line Number-${LINENO}"
 	for line in $lastseen 
 	do
 		[ -z "$line" ] && continue
@@ -50,11 +50,11 @@ DeactiveIdleDevices(){
 		if [ -n "$wl" ] ; then
 			newline=$(echo "${wl/\"active\":\"0\"/\"active\":\"1\"}")
 			sed -i "s~$wl~$newline~" "$_usersFile"
-			Send2Log "DeactiveIdleDevices: $id set to active (based upon lastseen.js)" 1
+			Send2Log "DeactiveIdleDevices: $id set to active (based upon lastseen.js)" 1 "${0##$d_baseDir/} : DeactiveIdleDevices : Line Number-${LINENO}"
 			local changes2=1
 		fi
 	done
-	[ -z "$changes2" ] && Send2Log "DeactiveIdleDevices: no deactived devices activated"
+	[ -z "$changes2" ] && Send2Log "DeactiveIdleDevices: no deactived devices activated" 0 "${0##$d_baseDir/} : DeactiveIdleDevices : Line Number-${LINENO}"
 	[ -n "$changes1" ] || [ -n "$changes2" ] && UsersJSUpdated
 }
 
@@ -64,21 +64,21 @@ source "${d_baseDir}/includes/dailytotals.sh"
 [ -n "$1" ] && _ds="$1"
 sleep 75 # wait until all tasks for the day should've been completed... may have to adjust this value
 
-Send2Log "End of day: $_ds" 1
-Send2Log "End of day: copy $hourlyDataFile --> $_path2CurrentMonth"
+Send2Log "End of day: $_ds" 1 "${0##$d_baseDir/} : Main : Line Number-${LINENO}"
+Send2Log "End of day: copy $hourlyDataFile --> $_path2CurrentMonth" 0  "${0##$d_baseDir/} : Main : Line Number-${LINENO}"
 cp "$hourlyDataFile" "$_path2CurrentMonth"
 
 #Calculate the daily totals
-Send2Log "End of day: tally the traffic for the day and update the monthly file"
+Send2Log "End of day: tally the traffic for the day and update the monthly file" 0 "${0##$d_baseDir/} : Main : Line Number-${LINENO}"
 CalculateDailyTotals ## no param --> implies value of _ds
 
-Send2Log "End of day: backup files as required" 
+Send2Log "End of day: backup files as required" 0 "${0##$d_baseDir/} : Main : Line Number-${LINENO}"
 cp "$tmplogFile" "$_path2logs"
 
-[ "$_doDailyBU" -eq "1" ] && tar -cf "${_path2bu}bu-${_ds}.tar.gz" $_usersFile $tmpLastSeen $(find -L ${d_baseDir} | grep "$_ds") 2>/dev/null && Send2Log "End of day: archive date specific files to '${_path2bu}bu-${_ds}.tar.gz'"
+[ "$_doDailyBU" -eq "1" ] && tar -cf "${_path2bu}bu-${_ds}.tar.gz" $_usersFile $tmpLastSeen $(find -L ${d_baseDir} | grep "$_ds") 2>/dev/null && Send2Log "End of day: archive date specific files to '${_path2bu}bu-${_ds}.tar.gz'" 0 "${0##$d_baseDir/} : Main : Line Number-${LINENO}"
 
 rm $(find "$tmplog" | grep "$_ds") #delete the date specific files
 
 DeactiveIdleDevices
 
-LogEndOfFunction
+LogEndOfFunction "Finished" 0 "${0##$d_baseDir/} : Main : Line Number-${LINENO}"

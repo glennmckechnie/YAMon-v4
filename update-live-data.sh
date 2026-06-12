@@ -7,6 +7,9 @@
 # updates the data for the live tab
 # run: by cron
 # History
+# 2026-06-02: Fix broken dpct expression (overlay, not /)
+#	allow for garbage response - Send2Log if req'd
+#	fixes long standing $doArchiveLiveUpdates error
 # 2026-05-22: 4.0.8 - no changes
 # 2020-01-26: 4.0.7 - no changes
 # 2020-01-03: 4.0.6 - added current traffic to the output file
@@ -20,7 +23,7 @@ d_baseDir=$(cd "$(dirname "$0")" && pwd)
 source "${d_baseDir}/includes/shared.sh"
 source "${d_baseDir}/includes/traffic.sh"
 
-Send2Log "Running update-live-data"
+Send2Log "Running update-live-data" 0 "${0##$d_baseDir/} : Start : Line Number ${LINENO}"
 
 CurrentConnections_0()
 { #_doCurrConnections=0 --> do nothing, the option is disabled
@@ -36,21 +39,38 @@ CurrentConnections_1()
 		echo ''
 	}
 
-	Send2Log "Running CurrentConnections_1 --> $_liveFilePath"
+	Send2Log "Running CurrentConnections_1 --> $_liveFilePath"  0 "${0##$d_baseDir/} : CurrentConnections_1 : Line Number ${LINENO}"
 
 	ArchiveLiveUpdates_0()
 	{ #_doArchiveLiveUpdates=0 --> do nothing, the option is disabled
 		return
 	}
-	ArchiveLiveUpdates_1()
-	{ #_doArchiveLiveUpdates=1
-		local dpct=$(df $d_baseDir | grep "^/" | awk '{print $5}')
-		local dspace=$(printf %02d $(echo "${dpct%\%} "))
-
-		if [ "$dspace" -lt '90' ] ; then
-			cat "$_liveFilePath" >> $_liveArchiveFilePath
+	ArchiveLiveUpdates_1(){ #_doArchiveLiveUpdates=1
+		local dpct dspace
+		#local diskpcent diskspace
+		# broken local dpct=$(df $d_baseDir | grep "^/" | awk '{print $5}')
+		#diskpcent=$(df "$d_baseDir" | awk 'NR>1 {print $5; exit}')
+		#Don't check the filesystem type, we want the % of d_baseDir in use
+		dpct=$(df -P "$d_baseDir" 2>/dev/null | awk 'NR==2{print $5}')
+		if printf '%s' "$dpct" | grep -qE '^[0-9]+%$'; then
+		  dspace=$(printf '%02d' "${dpct%\%}")
+		  #Send2Log "ArchiveLiveUpdates : BUGFIX : ${dpct} becomes ${dspace} available" 4 "${0##$d_baseDir/} : ArchiveLiveUpdates_1 : Line Number ${LINENO}"
 		else
-			Send2Log "ArchiveLiveUpdates_: skipped because of low disk space: $dpct" 3
+		  # NaN or ?? - pass a safe default
+		  dspace='99'
+		fi
+		# old local dspace=$(printf %02d $(echo "${dpct%\%} "))
+		# strip percent and pad
+		# if [ -n "$dpct" ]; then
+		#   diskspace=$(printf '%02d' "${diskpcent%\%}")
+		# else
+		#   diskspace=91   # fallback to "full" so
+		# fi
+		if [ "$dspace" -lt '90' ] ; then
+			cat "$_liveFilePath" >> "$_liveArchiveFilePath"
+			Send2Log "ArchiveLiveUpdates : cat $_liveFilePath >> $_liveArchiveFilePath" 3 "${0##$d_baseDir/} : ArchiveLiveUpdates_1 : Line Number ${LINENO}"
+		else
+			Send2Log "ArchiveLiveUpdates_: skipped because of low / unknown disk space: $dpct" 2 "${0##$d_baseDir/} : ArchiveLiveUpdates_1 : Line Number ${LINENO}"
 		fi
 	}
 	
@@ -87,18 +107,19 @@ CurrentConnections_1()
 	local ddd=$(awk "$_conntrack_awk" "$_conntrack")
 	echo -e "\n/*current connections by ip:*/" >> $_liveFilePath
 	local err=$(echo "${ddd%,}]" 2>&1 1>> $_liveFilePath)
-	#Send2Log "curr_connections >>>\n$ddd" 0
-	[ -n "$err" ] && Send2Log "ERROR >>> doliveUpdates:  $(IndentList "$err")" 3
+	#Send2Log "curr_connections >>>\n$ddd" 0 "${0##$d_baseDir/} : CurrentConnections_1 : Line Number ${LINENO}"
+	[ -n "$err" ] && Send2Log "ERROR >>> doliveUpdates:  $(IndentList "$err")" 3 "${0##$d_baseDir/} : CurrentConnections_1 : Line Number ${LINENO}"
 	#FIXME old debug code??? sh hates it, bash ignores it!
 	# sh: invalid number ''
-	# $doArchiveLiveUpdates
+	 $doArchiveLiveUpdates
+	Send2Log " >>> doArchiveliveUpdates:  $doArchiveLiveUpdates" 3 "${0##$d_baseDir/} : CurrentConnections_1 : Line Number ${LINENO}"
 }
 
 loads=$(cat /proc/loadavg | cut -d' ' -f1,2,3 | tr -s ' ' ',')
-Send2Log ">>> loadavg: $loads"
+Send2Log ">>> loadavg: $loads" 0 "${0##$d_baseDir/} : Main : Line Number ${LINENO}"
 
 echo -e "var last_update='$_ds $_ts'${_nl}serverload($loads)" > $_liveFilePath
 
 $doCurrConnections
 
-LogEndOfFunction
+LogEndOfFunction "Finished" 3 "${0##$d_baseDir/} : End : Line Number ${LINENO}"

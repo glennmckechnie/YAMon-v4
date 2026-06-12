@@ -8,7 +8,10 @@
 # tidies up things just after the end of each hour
 # run: by cron
 # History
-# 2026-05-22: 4.0.8 - no changes
+# 2026-06-09: 4.0.8 - Move html headers to function HTMLHeaders in shared.sh
+# 	Keep a copy of the individual hourly files before discarding
+#	Useful to rebuild the .js data files when thing go south.
+#	Add extra logging selectors
 # 2020-01-26: 4.0.7 - changed to list Tomato cru jobs in the log (thx tvlz)
 # 2020-01-03: 4.0.6 - get acRules based upon firmware
 # 2019-12-23: 4.0.5 - added log messages; added JS to head of tmplogFile
@@ -23,14 +26,22 @@ source "${d_baseDir}/includes/traffic.sh"
 
 hr=$(echo $_ts | cut -d':' -f1)
 sleep 59
-Send2Log "End of hour: $hr" 1
+Send2Log "End of hour: $hr" 1  "${0##$d_baseDir/} : Main : Line Number ${LINENO}"
 
 GetTraffic '-vnxZ'  # get the data and zero the tables
 
 sleep 10 # delay ~10 seconds into next hour to allow tasks from previous hour to finish... might have to adjust this value
 
-Send2Log "End of hour: append \`$rawtraffic_hr\` to \`$rawtraffic_day\`"
+Send2Log "End of hour: append \`$rawtraffic_hr\` to \`$rawtraffic_day\`" 0 "${0##$d_baseDir/} : Main : Line Number ${LINENO}"
 cat "$rawtraffic_hr" >> "$rawtraffic_day"
+# redundant debug line # Send2Log "End of hour: copy \`$rawtraffic_hr\` to \`/opt/YAMon4/data/2025/03/raw-traffic-2025-03-28-${hr}.txt\`" 4 "${0##$d_baseDir/} : Main : Line Number ${LINENO}"
+#cat "$rawtraffic_hr" >> "/opt/YAMon4/data/2025/03/raw-traffic-2025-03-28-${hr}.txt"
+#dailyLogFile='/opt/YAMon4/logs/2026-06-02.html'
+#rawtraffic_day='/opt/YAMon4/data/2026/06/raw-traffic-2026-06-02.txt'
+#rawtraffic_hr='/tmp/yamon/raw-traffic-2026-06-02-21.txt'
+#Keep a copy of the individual hourly files before discarding.
+cat "$rawtraffic_hr" >> "${rawtraffic_day%.txt}-${hr}.txt"
+Send2Log "End of hour: DEBUG : copy \`$rawtraffic_hr\` to \`${rawtraffic_day%.txt}-${hr}.txt\`" 4 "${0##$d_baseDir/} : DEBUG : Line Number ${LINENO}"
 
 if [ "$_firmware" -eq "0" ] ; then
 	acRules="$(cat /tmp/cron.d/yamon_jobs)"
@@ -40,9 +51,9 @@ else
 	acRules="$(crontab -l)"
 fi
 
-Send2Log "crontab: $(IndentList "$acRules")" 0
-Send2Log "blocked: $(IndentList "$(iptables -L | grep blocked -B 2)")" 2
-Send2Log "End of hour: append \`$tmplogFile\` to \`$dailyLogFile\`" 2
+Send2Log "crontab: $(IndentList "$acRules")" 0  "${0##$d_baseDir/} : Main : Line Number ${LINENO}"
+Send2Log "blocked: $(IndentList "$(iptables -L | grep blocked -B 2)")" 0  "${0##$d_baseDir/} : Main : Line Number ${LINENO}"
+Send2Log "End of hour: append \`$tmplogFile\` to \`$dailyLogFile\`" 1  "${0##$d_baseDir/} : Main : Line Number ${LINENO}"
 #contents of tmplog minus the header lines
 tmplogContents=$(cat "$tmplogFile" | grep -v "<\(/\{0,1\}head\|html\|meta\|link\|script\|head\|body\|!--header--\)")
 
@@ -51,29 +62,34 @@ echo "$tmplogContents</div>" | sed -E "s~^ ([^<].*$)~<pre>\1</pre>~g" | sed -E "
 #use temp timestamps to catch the change of hour & date
 tds=$(date +"%Y-%m-%d")
 thr=$(date +"%H")
+HtmlHeader "<!--header-->" "$tds" "$tmplogFile" "$thr"
+
+DeleteSeeSharedHtmlHeader(){
 #reset the temporary log file
 echo "<html lang='en'>
 <head>
 <meta http-equiv='cache-control' content='no-cache' />
 <meta http-equiv='Content-Type' content='text/html;charset=utf-8' />
 <link rel='stylesheet' href='//code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css'>
-<link rel='stylesheet' type='text/css' href='https://usage-monitoring.com/current/css/normalize.css'>
-<link rel='stylesheet' type='text/css' href='https://usage-monitoring.com/current/css/logs.css'>
+<link rel='stylesheet' type='text/css' href='../css/normalize.css'>
+<link rel='stylesheet' type='text/css' href='../css/logs.css'>
 <script src='https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js'></script>
 <script src='https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js'></script>
-<script src='https://usage-monitoring.com/current/js/logs.js'></script>
+<script src='../js/logs.js'></script>
 </head>
 <body>
 <div id='header'> <!--header-->
 <h1>Log for <span id='logDate'>$tds</span></h1> <!--header-->
-<p>Show: <label><input class='filter' type='checkbox' name='no-errors' checked>Errors</label><label><input class='filter' type='checkbox' name='no-ll2' checked>Level 2</label><label><input class='filter' type='checkbox' name='no-ll1' checked>Level 1</label><label><input class='filter' type='checkbox' name='no-ll0'>Level 0</label></p> <!--header-->
+<p>Show: <label><input class='filter' type='checkbox' name='no-errors' checked>Errors</label><!--label><input class='filter' type='checkbox' name='no-ll5' checked>Level 5</label --><label><input class='filter' type='checkbox' name='no-ll4' checked>Level 4</label><label><input class='filter' type='checkbox' name='no-ll3' checked>Level 3</label><label><input class='filter' type='checkbox' name='no-ll2' checked>Level 2</label><label><input class='filter' type='checkbox' name='no-ll1' checked>Level 1</label><label><input class='filter' type='checkbox' name='no-ll0'>Level 0</label></p> <!--header-->
 </div> <!--header-->
 <div class='hour-contents'><p>Hour: $thr</p>
 " > "$tmplogFile"
+}
 
-Send2Log "End of hour: remove \`$rawtraffic_hr\`"
-rm "$rawtraffic_hr" 
+Send2Log "End of hour: remove \`$rawtraffic_hr\`" 1  "${0##$d_baseDir/} : Main : Line Number ${LINENO}"
+rm "$rawtraffic_hr"
 
-Send2Log "Processes: $(IndentList "$(ps | grep -v grep | grep $d_baseDir)")"
+Send2Log "Disk Usage: $(IndentList "$(ps | df -Th )")" 0  "${0##$d_baseDir/} : Main : Line Number ${LINENO}"
+Send2Log "Processes: $(IndentList "$(ps | grep -v grep | grep $d_baseDir)")" 0  "${0##$d_baseDir/} : Main : Line Number ${LINENO}"
 
-LogEndOfFunction
+LogEndOfFunction "Finished" 0 "${0##$d_baseDir/} : Main - end : Line Number ${LINENO}"

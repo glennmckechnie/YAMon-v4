@@ -8,6 +8,7 @@
 # runs tasks needed to start a new hour
 # run: by cron
 # History
+# 2026-06-09: Add debug logging
 # 2026-05-22: 4.0.8 - no changes
 # 2020-01-26: 4.0.7 - no changes
 # 2020-01-03: 4.0.6 - no changes
@@ -21,15 +22,15 @@ d_baseDir=$(cd "$(dirname "$0")" && pwd)
 source "${d_baseDir}/includes/shared.sh"
 
 hr=$(echo $_ts | cut -d':' -f1)
-Send2Log "new hour: Start of hour $hr" 1
+Send2Log "new hour: Start of hour $hr" 1  "${0##$d_baseDir/} : Main : Line Number ${LINENO}"
 
 rawtraffic_hr="${tmplog}raw-traffic-$_ds-$hr.txt"
 ChangePath 'rawtraffic_hr' "$rawtraffic_hr"
 
 [ ! -f "$rawtraffic_hr" ] && > "$rawtraffic_hr"
-Send2Log "new hour: created new temporary hour file: $rawtraffic_hr"
+Send2Log "new hour: created new temporary hour file: $rawtraffic_hr" 0  "${0##$d_baseDir/} : Main : Line Number ${LINENO}"
 
 sleep 5
 [ -z "$(grep "// Hour: $hr" "$hourlyDataFile")" ] && echo -e "\n// Hour: $hr" >> "$hourlyDataFile"
 
-LogEndOfFunction
+LogEndOfFunction "Finished" 0  "${0##$d_baseDir/} : Main : Line Number ${LINENO}"

@@ -10,11 +10,12 @@
 ####################################################################################
 
 
-#\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\  ***  NOTE  ***  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\#
+#\\\\\\\\  ***  NOTE  ***  \\\\\\\\\#
 # ***NEW*** - You must re-run start.sh after you've editted entries in this file!  #
-#\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\#
+#\\\\\\\\\\\\\\\\\\\\\#
 
 # History
+# 2026-06-09: Enable the dolLocalFiles switch - Use Als site or the local files.
 # 2019-06-18: development starts on initial v4 release... 
 #             see https://usage-monitoring.com/whatsnew.php for a list of the changes in this file
 
@@ -24,7 +25,7 @@ _updated=''                                  #date on which YAMon was last updat
 _router=''                                   #router brand name & model (if it can be determined)
 _firmwareName=''                             #full text of router firmware (if it can be determined)
 
-_firmware='0'                                # which firmware is running on the router: permitted values: 0->DD-WRT(*) || 1->OpenWrt || 2->Asuswrt-Merlin || 3->Tomato || 4->LEDE || 5->Xwrt-Vortex || 6->Turris || 7->Padavan
+_firmware='1'                                # which firmware is running on the router: permitted values: 0->DD-WRT(*) || 1->OpenWrt || 2->Asuswrt-Merlin || 3->Tomato || 4->LEDE || 5->Xwrt-Vortex || 6->Turris || 7->Padavan
 _lang=''                                     # currently only 'en' is available... (* if null, defaults to `en`)
 _dbkey=''                                    # if not null, this option will sync settings across all of your devices... 
 _updateTraffic=''                            # number of minutes between traffic updates (* if null, defaults to `4`)
@@ -34,7 +35,7 @@ _purgeOldFiles='1'                           # whether or not to delete old back
 _loglevel='1'                                # amount of detail to include in the log: permitted values: 0->really verbose || 1->all (*) || 2->less || 3->serious only
                                              # set _loglevel=999 to turn off logging
 _doLiveUpdates='1'                           # whether or not to record live usage - values: 1-->Yes(*) || 0->No
-_doCurrConnections=1                         # whether or not to include current connections in the live usage file - values: 1-->Yes(*) || 0->No
+_doCurrConnections='1'                         # whether or not to include current connections in the live usage file - values: 1-->Yes(*) || 0->No
 _doArchiveLiveUpdates='0'                    # whether or not to retain a copy of all of the live data - values: 1-->Yes || 0->No (* recommended)
                                              #   NB - only required if _doLiveUpdates == 1 & could get big!
 _monthlyDataCap='100'                        # interval data cap (in GB); set to -1 if unlimited
@@ -57,9 +58,9 @@ _bridgeMAC=''                                # mac address in form XX:XX:XX:XX:X
 _defaultGroup='Unknown'                      # default group/owner name for new devices
 _defaultDeviceName='New Device'              # default name for new devices if nothing can be found by the script
 _do_separator='_'                            # a default character that separates the owner and device name in static leases or dnsmasq values, e.g., Al_iPhone (* default ``)
-_doLocalFiles='0'                            # make a local copy of JS, CSS and images: 0->no(*recommended) || 1->yes
-                                             #   NB - set to 1 if you do not want use the files hosted at my domain (usage-monitoring.com)
-                                             #   NB - get the value for this parameter from the settings tab
+_doLocalFiles='0'                            # make a local copy of JS, CSS and images: 0->no (this will use the offsite files) || 1->yes (this will use your local files)
+                                             #   NB - set to 0 if you want to use the files hosted at Als domain (usage-monitoring.com)
+                                             #   NB - get the value for this parameter from the settings tab (ToDo FIXME)
 _ignoreGateway='1'                           # whether or not to exclude any updates involving your gateway: 0->no(*) || 1->yes
 _gatewayMAC=''                               # MAC address in form XX:XX:XX:XX:XX:XX for the gateway
 _sendAlerts='0'                              # whether or not to send alerts 0->no(*) || 1->yes (via usage-monitoring.com) || 2->via msmtp 
@@ -75,3 +76,4 @@ _ftp_user=''                                 # set to the username for your FTP 
 _ftp_pswd=''                                 # set to the password for your FTP site
 _ftp_dir=''                                  # set to root directory path to your desired storage location
 _local_ip6='fe80:,fd77:'                     # preface for local ip6 addresses (entered as a comma separated list)
+_domain='https://usage-monitoring.com/'      # Added URL to js server -https://usage-monitoring.com is the default while it's still running

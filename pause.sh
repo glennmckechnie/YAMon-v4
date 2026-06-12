@@ -19,7 +19,7 @@
 
 d_baseDir=$(cd "$(dirname "$0")" && pwd)
 source "${d_baseDir}/includes/shared.sh"
-Send2Log "Running pause.sh" 2
+Send2Log "Running pause.sh" 2 "${0##$d_baseDir/} : Main : Line Number ${LINENO}"
 source "${d_baseDir}/includes/start-stop.sh"
 
 StopScheduledJobs

@@ -557,15 +557,21 @@ else
 		lan_ip=$(nvram get lan_ipaddr)
 	fi
 
+
+	Prompt '_doLocalFiles' 'Do you want to setup YAMon4 to work from local *.js files' "$yn_n" '0' $zo_r
+	[ "$_doLocalFiles" == "1" ] && Prompt '_doLocalFiles' "Do you want to use the local js files by default?${_nlsp}_doLocalFiles=1 (True) will ignore the  usage-monitoring.com site." "$yn_y" '1' $zo_r '_doLocalFiles'
+
+	_domain="https://usage-monitoring.com/"
+	Prompt '_domain' "Specify the URL for the "current/js" files. The default is to use the original files at ${_domain}" "If you want to change this to another (development) sevrer and avoid the "splash" screens then insert the domain here. eg:- http:\`/\`\'/\'example.com " "$_domain" $re_path_slash
+
 	Prompt '_wwwPath' 'Specify the path to the web directories?' "The path must start and end with a \`/\`" "$_wwwPath" $re_path_slash
 	Prompt '_wwwURL' "Specify the URL path to the reports - e.g. $lan_ip\`<path>\`?" "  \`<path>\` must start and end with a \`/\`.  
       NB - enter just the path & do *NOT* include the IP address!" "$_wwwURL" $re_path_slash
-#set -v -x
 	if [ "$_firmware" == "1" ] && [ -d '/www' ] ; then
 	     # specifically for an 'openwrt one'
 	     ln -sf -- "${_wwwPath}" "/www${_wwwURL}"
         fi
-#set +v +x
+
 	Prompt '_includeBridge' "Do you have a bridge on your network?${_nlsp}(i.e., a second router or other device to extend the wireless range)" "$yn_n" '0' $zo_r
 	if [ "$_includeBridge" == "1" ] ; then
 		Prompt '_bridgeMAC' "What is the MAC address for your bridge device?${_nlsp}See the help topic if you have multiple bridging devices" "Enter a valid MAC address - e.g., 11:22:33:44:55:66" '' "^([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}$" '_includeBridge'
@@ -740,7 +746,7 @@ One last thing to do before restarting the new version...
 Prior versions of YAMon v4 may have introduced some errors in various
 files."
 
-Prompt 't_fix' 'Do you run the fixes script now?  It might take a couple minutes to complete...' "$yn_y" '1' $zo_r
+Prompt 't_fix' 'Do you run the fixes script now?  It might take a couple minutes to complete...' "$yn_n" '0' $zo_r
 if [ "$t_fix" == "1" ] ; then
 	echo -e "Thanks in advance for your patience!"
 	source "${d_baseDir}/includes/fixes.sh"

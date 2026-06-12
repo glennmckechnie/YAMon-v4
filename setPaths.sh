@@ -42,7 +42,7 @@ check4Overflow(){
 	echo $n
 }
 
-if [ -n "$1" ] && [ "$1" == 'clean' ] ; then
+if [ -n "$1" ] && [ "$1" = 'clean' ] ; then
 	echo 'Clean install...'
 
 	[ -d "/tmp/yamon/" ] && rmdir /tmp/yamon/
@@ -142,11 +142,12 @@ echo -e "\n#Generic functions" >> "${pathsFile}"
 		AddEntry '_conntrack_awk' 'BEGIN { printf "var curr_connections=["} { gsub(/(src|dst|sport|dport|bytes)=/, ""); if($1 == "tcp"){ printf "[\"%s\",\"%s\",%s,\"%s\",%s,%s],",$1,$5,$7,$6,$8,$10;} else if($3 == "udp"){ printf "[\"%s\",\"%s\",%s,\"%s\",%s,%s],",$1,$4,$6,$5,$7,$9;} else { printf "[\"%s\",\"%s\",,\"%s\",,%s],",$1,$4,$5,$9;} }'
 	fi
 	
+	# _path2CurrentMonth='/opt/YAMon4/data/2026/06/'
 	if [ "${_doLiveUpdates:-1}" -eq "1" ] ; then
 		AddEntry '_liveFilePath' "${_wwwPath}${_wwwJS:-js/}live_data4.js"
 		AddEntry 'doCurrConnections' "CurrentConnections_${_doCurrConnections}"
 		AddEntry 'doArchiveLiveUpdates' "ArchiveLiveUpdates_${_doArchiveLiveUpdates}"
-		[ "${_doArchiveLiveUpdates:-0}" -eq "1" ] && AddEntry '_liveArchiveFilePath' "$_path2CurrentMonth${ds}-live_data4.js"
+		[ "${_doArchiveLiveUpdates:-0}" -eq "1" ] && AddEntry '_liveArchiveFilePath' "${_path2CurrentMonth}${_ds}-live_data4.js"
 	fi
 #computed function names
 

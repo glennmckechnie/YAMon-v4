@@ -46,7 +46,7 @@ html {
 }
 
 .hour-contents p {
-	margin-top: 126px;
+	margin-top: 132px;
 }
 
 button {
@@ -113,20 +113,35 @@ label:active {
 }
 
 .ll0 {
-	color: #777;
+	color: #555;
 	font-size: smaller;
 }
+/*https://www.w3schools.com/colors/colors_picker.asp*/
 
 .hour-contents .ll2 {
 	background-color: #EEE;
-	color: #00F;
+	color: #00D;
 	font-style: italic;
 	font-weight: bold;
 }
 
 .hour-contents .ll3 {
 	background-color: #EEE;
-	color: #0C0;
+	color: #080;
+	font-style: italic;
+	font-weight: bold;
+}
+
+.hour-contents .ll4 {
+	background-color: #EEE;
+	color: #500;
+	font-style: italic;
+	font-weight: bold;
+}
+
+.hour-contents .ll5 {
+	background-color: #EEE;
+	color: #909;
 	font-style: italic;
 	font-weight: bold;
 }
@@ -134,14 +149,18 @@ label:active {
 .ll0 ul,
 .ll1 ul,
 .ll2 ul,
-.ll3 ul {
+.ll3 ul,
+.ll4 ul,
+.ll5 ul {
 	margin: 0;
 }
 
 .ll0 li,
 .ll1 li,
 .ll2 li,
-.ll3 li {
+.ll3 li,
+.ll4 li,
+.ll5 li {
 	color: inherit;
 }
 
@@ -149,7 +168,9 @@ label:active {
 .hour-contents.showing .ll0,
 .hour-contents.showing .ll1,
 .hour-contents.showing .ll2,
-.hour-contents.showing .ll3 {
+.hour-contents.showing .ll3,
+.hour-contents.showing .ll4,
+.hour-contents.showing .ll5 {
 	height: auto;
 	visibility: revert;
 }
@@ -158,7 +179,9 @@ label:active {
 .hour-contents.showing.no-ll0 .ll0,
 .hour-contents.showing.no-ll1 .ll1,
 .hour-contents.showing.no-ll2 .ll2,
-.hour-contents.showing.no-ll3 .ll3 {
+.hour-contents.showing.no-ll3 .ll3,
+.hour-contents.showing.no-ll4 .ll4,
+.hour-contents.showing.no-ll5 .ll5 {
 	height: 0px;
 	visibility: collapse;
 }
@@ -167,12 +190,18 @@ label:active {
 	background: #b78383;
 	color: #F00;
 	font-weight: bold;
-	margin: 0 8px;
+	/*margin: 0 8px;*/
+	/*margin: 0; /* Remove the default margin */
+	/*padding: 4px 8px;  Optional: Add some padding for better appearance */
 }
 
 .err:before {
 	display: inline-block;
 	min-width: 132px;
+}
+
+.highlight {
+	color: gray;
 }
 
 pre {
@@ -181,4 +210,109 @@ pre {
 	font-weight: bold;
 	margin: 0;
 	padding: 0 0 0 72px;
+}
+
+/* tooltip coloring */
+.tooltip {
+	display: none; /* Hide the tooltip by default */
+	position: absolute; /* Position it relative to the label */
+	padding: 5px; /* Padding around the text */
+	border-radius: 4px; /* Rounded corners */
+	font-size: 12px; /* Font size */
+	z-index: 1000; /* Ensure it appears above other elements */
+	bottom: 10px;  Offset the label 10px from the top */
+	left: 10px;  Offset the label 10px from the left */
+	/*font-weight: bold;*/
+	font-style: italic;
+	/*right: 50px;  Offset the label 10px from the left */
+	/*width: auto;  /*Let the browser automatically calculate the width of the tooltip */ 
+	/*min-width: 100px; /* Set the minimum width of the tooltip to 200px */
+	/*max-width: 600px; /* Set the maximum width of the tooltip to 300px */
+}
+
+
+label {
+	/*position: relative;  Position the label relative to the tooltip */
+	/*position: absolute;  Position the label absolutely */
+	/*position: sticky;  Position the label sticky */
+	position: relative; /* Position the label fixed to the viewport */
+	/*bottom: 10px;  Offset the label 10px from the top */
+	/*left: 10px;  Offset the label 10px from the left */
+}
+
+
+label:hover .tooltip {
+	display: block; /* Show the tooltip on hover */
+}
+
+/* Tooltip styles for each log level */
+.tooltip-no-errors {
+	background-color: #b78383; /* Background color for error Level */
+	color: #F00; /* Text color for error Level */
+	font-weight: bold;
+}
+.tooltip-ll5 {
+	/*background-color: #D0D0D0; /* Background color for Level 5 */
+	background-color: #FFFFFF; /* Background color for Level 1 */
+	color: #909; /* Text color for Level 5 */
+	font-weight: bold;
+}
+
+.tooltip-ll4 {
+	/*background-color: #A0D0E0; /* Background color for Level 4 */
+	background-color: #FFFFFF; /* Background color for Level 1 */
+	color: #500; /* Text color for Level 4 */
+	font-weight: bold;
+}
+
+.tooltip-ll3 {
+	/*background-color: #FFE0A0; /* Background color for Level 3 */
+	background-color: #FFFFFF; /* Background color for Level 1 */
+	color: #080; /* Text color for Level 3 */
+	font-weight: bold;
+}
+
+.tooltip-ll2 {
+	/*background-color: #E0FFE0; /* Background color for Level 2 */
+	background-color: #FFFFFF; /* Background color for Level 1 */
+	color: #00D; /* Text color for Level 2 */
+	font-weight: bold;
+}
+
+.tooltip-ll1 {
+	/*background-color: #FFFFFF; /* Background color for Level 1 */
+	color: #000; /* Text color for Level 1 */
+	font-weight: bold;
+}
+
+.tooltip-ll0 {
+	/*background-color: #F8D0D0; /* Background color for Level 0 */
+	background-color: #FFFFFF; /* Background color for Level 1 */
+	color: #555; /* Text color for Level 0 */
+	font-weight: bold;
+}
+/* temporay code for mouse over of lineNos
+[data-title]:hover:after {
+    opacity: 1;
+    transition: all 0.1s ease 0.5s;
+    visibility: visible;
+}
+[data-title]:after {
+    content: attr(data-title);
+    background-color: #00FF00;
+    color: #111;
+    font-size: 150%;
+    position: absolute;
+    padding: 1px 5px 2px 5px;
+    bottom: -1.6em;
+    left: 100%;
+    white-space: nowrap;
+    box-shadow: 1px 1px 3px #222222;
+    opacity: 0;
+    border: 1px solid #111111;
+    z-index: 99999;
+    visibility: hidden;
+}
+[data-title] {
+    position: relative;
 }

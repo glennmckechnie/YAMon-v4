@@ -3,19 +3,17 @@
 ##########################################################################
 #									 #
 # Yet Another Monitor (YAMon)						 #
-# Copyright (c) 2013-present Al Caughey				 #
+# Copyright (c) 2013-present Al Caughey					 #
 # All rights reserved.							 #
 # See `yamon4.x.js` for more T&C's					 #
 #									 #
 ##########################################################################
-# Glenn McKechnie - modified 01/02/25
-# added Activ8me (Australia) csv dat file format
 */
 jQuery.extend (
     jQuery.expr[':'].containsCI = function (a, i, m) {
-        var sText   = (a.textContent || a.innerText || "")
-        var zRegExp = new RegExp (m[3], 'i')
-        return zRegExp.test (sText)
+	var sText   = (a.textContent || a.innerText || "")
+	var zRegExp = new RegExp (m[3], 'i')
+	return zRegExp.test (sText)
     }
 )
 Object.getPrototypeOf(localStorage).find=function(s) {
@@ -244,7 +242,7 @@ function setSettingsDefaults(){
 		livekbs_do.addColumn('number','ave. downloads');
 		livekbs_up=new google.visualization.DataTable();
 		livekbs_up.addColumn('string','Time');
-		livekbs_up.addColumn('number','uploads');
+		livekbs_up.addColumn('number','uploads')
 		livekbs_up.addColumn('number','ave. uploads');
 	}
 	$('#ShowRD').prop('checked',g_Settings['ShowRD']);
@@ -658,10 +656,15 @@ function setButtonsActions(){
 		$('#process-isp').removeClass('disabled')
 	})
 	/*Clicks*/
-		$('._detanod, .amount').click(function (e) {
-		var amt=$(this).attr('amount'),url = 'https://www.paypal.me/YAMon/'+amt;
-		window.open(url, '_blank');
-		return false
+	//	$('._detanod, .amount').click(function (e) {
+	//	var amt=$(this).attr('amount'),url = 'https://www.paypal.me/YAMon/'+amt;
+	//	window.open(url, '_blank');
+	//	return false
+	//});
+	$('._detanod, .amount').off('click').on('click', function(e){
+	e.preventDefault();
+	e.stopImmediatePropagation(); // prevents any other handlers
+	return false;
 	});
 	$('#Refresh').click(function(){
 		$('#daily-tab').removeClass('loaded')
@@ -1328,8 +1331,8 @@ function setButtonsActions(){
 			in_txt=in_txt.replace(/, /g,' ').replace(/,/g,'')
 		else if (isp=='Sodetel') //change 1,234.56 to 1234.56
 			in_txt=in_txt.replace(/,/g,'')
-                else if (isp=='Activ8me')
-                        in_txt = in_txt.replace(/mb/g,'') // remove mb string
+		else if (isp=='Activ8me')
+			in_txt = in_txt.replace(/mb/g,'') // remove mb string
 		
 		in_txt=in_txt.replace(/"/g,'').replace(/[ \/,\t]+/g,' ').split('\n').sort()
 
@@ -1341,7 +1344,6 @@ function setButtonsActions(){
 			
 			var factor=g_toGB
 			var fields=line.trim().split(' ')
-			//sio && console.log(isp, fields)
 			var mnf=0, daf=1, yrf=2, dof=3, upf=4
 			switch (isp) {
 				case 'ATT':
@@ -1351,33 +1353,32 @@ function setButtonsActions(){
 				case 'Cox':
 				case 'GCI':
 				case 'TekSavvy':
-				break
+					break
 				case 'Afrihost':
 					daf=0, mnf=1, dof=4, upf=5
 					factor=g_toMB
-				break
+					break
 				case 'Electronic_Box': 
 					yrf=0, mnf=1, daf=2
-				break
+					break
 				case 'Rogers':
 					factor=g_toMB
-				break
+					break
 				case 'Sodetel':
 					factor=g_toMB
 					dof=5, upf=6
-				break
-				break
-                                case 'Activ8me':
-                                        factor=g_toMB
-                                        daf=0, mnf=1, yrf=2, dof=3, upf=4
-                                break
+					break
+				case 'Activ8me':
+					factor=g_toMB
+					daf=0, mnf=1, yrf=2, dof=3, upf=4
+					break
 				case 'Telstra':
 					factor=g_toMB
 					daf=0, mnf=1, dof=2, upf=3, yrf=''
-				break
+					break
 				case 'Videotron': /* Videotron */
 					dof=2, upf=3, yrf=''
-				break
+					break
 			}
 			if(isNaN(fields[daf])) return false
 			return {dn:fields[daf], down:(fields[dof]*factor||0).toFixed(0), up:(fields[upf]*factor||0).toFixed(0), mn:fields[mnf], yr:fields[yrf]||-1}
@@ -1504,7 +1505,8 @@ function setButtonsActions(){
 	})
 	$('#intro-n').click(function(){
 		var cv=$('.intro-t:visible'), woi=cv.index()
-		if(woi==$('.intro-t').last().index()){
+		if (cv.index() >= 1) {
+		//if(woi==$('.intro-t').last().index()){
 			/*if(typeof(g_Settings['bw_cap'])=='undefined'||(_unlimited_usage==1 && typeof(g_Settings['bonus_cap'])=='undefined')){
 				alert('You have not properly specified your bandwidth cap info!')
 				$('.req-settings').show().siblings('.intro-t').hide()
@@ -2972,17 +2974,17 @@ function nudge(msg){
 				g_Settings.fnd=data.res
 				saveSettings(false)
 				$('.dismiss').slideUp('fast')
-				$('#pu-comment').text(data.msg).slideDown('slow').siblings().slideUp('fast')
-				$('#pop-up').delay(3600).slideUp('slow').fadeOut('slow')
+				$('#pu-comment').html(data.msg).slideDown('slow').siblings().slideUp('fast')
+				$('#pop-up').delay(5000).slideUp('slow').fadeOut('slow')
 			}
 			else {
 				alert( 'Something bad happened... wait a few minutes and try again or contact Al' );
 			}
 		})
 		.fail(function(a,b,c){
-			//console.log( 'Something bad happened...',a,b,c )
+			console.log( 'Something bad happened...',a,b,c )
 			$('.dismiss').slideUp('fast')
-			$('#pu-comment').text(data.msg).slideDown('slow').siblings().slideUp('fast')
+			$('#pu-comment').html(data.msg).slideDown('slow').siblings().slideUp('fast')
 			$('#pop-up').delay(3600).slideUp('slow').fadeOut('slow')
 		})
 	})
@@ -3051,7 +3053,7 @@ function checkFiles(){
 	});
 }
 function addISPList(){
-	var isp_list = ['','Rogers|Canada','Electronic Box|Canada','Bell (Eng)|Canada','Bell (Fr)|Canada','Cox|United States','ATT|United States','Activ8me|Australia','Telstra|Australia','Sodetel|Lebanon','TekSavvy|Canada','GCI|United States','Videotron|United States','Cable ONE|United States','Afrihost|South Africa']
+	var isp_list = ['','Rogers|Canada','Electronic Box|Canada','Bell (Eng)|Canada','Bell (Fr)|Canada','Cox|United States','ATT|United States','Activ8me|Australia','Telstra|Australia','Sodetel|Lebanon','TekSavvy|Canada','GCI|United States','Videotron|United States','Cable ONE|United States','Afrihost|South Africa','AT&T|TBD']
 	$('#isp-format').html('')
 	$('<option/>').attr('value','').attr('disabled','disabled ').text('Pick your ISP').appendTo('#isp-format')
 	$(isp_list).sort().each(function (a, b) {
@@ -3213,7 +3215,7 @@ function getIntro(){
 					$('.ui-dialog-buttonset .ui-button').last().hide()
 					cv.hide()
 					cv.prev().show()
-					//console.log(cv.prev().index(), $('.intro-t').first().index())
+					console.log(cv.prev().index(), $('.intro-t').first().index())
 					if(cv.prev().index()==$('.intro-t').first().index()){
 						$('.ui-dialog-buttonset .ui-button').first().hide()
 					}
@@ -3222,7 +3224,7 @@ function getIntro(){
 					var cv=$('.intro-t:visible')
 					cv.hide()
 					cv.next().show()
-					//console.log(cv.next().index(), $('.intro-t').last().index())
+					console.log(cv.next().index(), $('.intro-t').last().index())
 					if(cv.next().index()==$('.intro-t').last().index()){
 						$('.ui-dialog-buttonset .ui-button').last().show()
 						$('.ui-dialog-buttonset .ui-button').last().prev().hide()
@@ -3242,8 +3244,7 @@ function getIntro(){
 		$('.ui-dialog-titlebar .ui-button').hide()
 		$('.ui-dialog-buttonset .ui-button').last().hide()
 		$('.ui-dialog-buttonset .ui-button').first().hide()
-		//console.log($('.intro-t:visible').index(), $('.intro-t').first().index(), $('.intro-t').last().index())
-		$('._detanod').appendTo($('.intro-t').last())
+		console.log($('.intro-t:visible').index(), $('.intro-t').first().index(), $('.intro-t').last().index())
 	});
 
 }

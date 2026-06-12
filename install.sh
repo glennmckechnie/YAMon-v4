@@ -15,7 +15,9 @@
 # with that; and here it is. Use the new install.sh to install this
 # repos code as 
 
-YAMON='/opt/YAMon4/'
+d_baseDir=$(cd "$(dirname "$0")" && pwd)
+
+#YAMON='/opt/YAMon4/'
 
 echo "
 ********************************************************
@@ -32,8 +34,7 @@ usable but redundant (and will work only while the parent
 site remains up)
 
 It has been renamed as install-original.sh. Use it if you
- want but the files you fetch won't be what's in this repo
-      And that maybe what you want -- you decide!
+ want, but the files you fetch won't be what's in this repo
 
 For old, but still relevant installation tips & tricks, see 
        https://usage-monitoring.com/installv4.php
@@ -68,28 +69,33 @@ done
 echo "
 
 Please specify the fully qualified path to your
-installation directory - e.g., \`$YAMON\`.
+installation directory - currently it is at  \`$d_baseDir\`
+Accepting the default (/opt/YAMon4) is preferred but that
+may not be possible depending on you routers configuration
+If you must change it then take note of any odd issues with paths.
+
 "
 tries=0
 readstr="	Either
-	- hit <enter> to accept \`$YAMON\`, or
-	- type your preferred installation location: "
+	- hit <enter> to accept \`$d_baseDir\`, or
+	- optionally (but not recomended) type your
+	  preferred installation location: "
 while true; do
 	read -p "$readstr" resp
-	resp="${resp:-$YAMON}"
-	YAMON="${resp%%/}/" # ensure the path ends with a single /
-	#echo "YAMON: $YAMON"
-	p2c=$(dirname "$YAMON")
-	[ -z "${p2c%/}" ] && p2c="$YAMON"
+	resp="${resp:-$d_baseDir}"
+	d_baseDir="${resp%%/}/" # ensure the path ends with a single /
+	#echo "d_baseDir: $d_baseDir"
+	p2c=$(dirname "$d_baseDir")
+	[ -z "${p2c%/}" ] && p2c="$d_baseDir"
 	#echo "$p2c: $(ls -laL "$p2c" | grep ' .$' | awk '{print $1}')"
 	
 	if [ -z "$(ls -laL  "$p2c" | grep ' .$' | awk '{print $1}' | grep 'w')" ] ; then
 		echo -e "\n    *** Un-oh... You do not have write permissions in '$p2c'!\n"
-	elif [ -d "$YAMON" ] ; then
+	elif [ -d "$d_baseDir" ] ; then
 		break
 	else
-		mkdir -p "$YAMON"
-		[ -d "$YAMON" ] && break
+		mkdir -p "$d_baseDir"
+		[ -d "$d_baseDir" ] && break
 		echo -e "\n    *** The installation directory could not be created?!?\n"
 	fi
 	readstr="    Please try again: "
@@ -105,8 +111,8 @@ echo "
 Installing YAMon...
 "
 
-chmod +x "$YAMON"
-[ -d "${YAMON}data" ] && chmod -R 666 "${YAMON}data"
+chmod +x "$d_baseDir"
+[ -d "${d_baseDir}data" ] && chmod -R 666 "${d_baseDir}data"
 sleep 1
 
 _enableLogging=1
@@ -114,7 +120,9 @@ _log2file=1
 _loglevel=0
 
 
+source "${d_baseDir}setup4.0.8.sh"
 
+exit 0
 
 # param='verify'
 echo -e "	
@@ -137,4 +145,3 @@ those md5sum checks.  Rest assured they are good!
 	"
 sleep 5
 #[ ! -z "$bCanClear" ] && clear
-source "${YAMON}setup4.0.8.sh"

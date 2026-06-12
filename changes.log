@@ -6,8 +6,51 @@
 # Summary of changes in YAMon
 
 * History
+  > 2026-06-09: 4.0.8
+	+ Revisit the local / remote file code because it basically wasn't working - limping along would be the
+	    kindest description.
+	+ Enabled the doLocalFiles switch. (as part of the above comment) _domain and _doLocalFiles in config.file
+	+ duplicate the intro.php file section locally (again, all for the dual location switch)
+	+ add more verbose logging (using mouse over pop-up on the logs date (HH:MM:SS)
+	      end-of-day.sh end-of-hour.sh new-day.sh new-hour.sh shared.sh traffic.sh pause.sh start.sh 
+	      update-live-data.sh update-reports.sh check-network.sh start-stop.sh
+	      ... others to be adjusted later.
+	+ add a debug switch to turn the above "File : Function: LINENO " debug information off
+	+ start adjusting variable names to human readable strings. starting with prompts.sh
+		+ Short and obscure is okay if you're familiar with the code
+		+ Long and verbose might chew up some memory, but it makes debugging the code so much easier!
+	+ Fix a longstanding bug in live-updates.sh
+	+ Add backupYAMon4.sh to ensure a complete, reproducable installation. ie:- A full snapshot of all files
+	     Capture existing files, don't rely on symlinks pointing to none / or newer data.
+	+ check-network.sh: Fix oddball case issue and tweak CheckMacIP4Duplicates()
+	+ Move html header code to one location --> shared.sh. Replace original blocks in end-of-hour.sh and new-day.sh
+		with function call HtmlHeader()
+	+ traffic.sh:  Fix ov (oldvalue?) bug. For whatever reason ov can fail - we reset it to last value and carry on.
+	    It seems to repair itself quickly.
+	    Also switch off ipv6 - as Al C. originally had.
+	+ install.sh: change hardcoded /optYAMon4 to d_baseDir logic
+	+ setPaths: POSIX compliance - fix typo (mine)
+	+ setup4.0.8.sh: For debugging - Add extra naming to validate.sh calls.
+	    add _doLocalFiles and _domain default values with options to change them. - goes with default-config and config files,
+	+ start.sh: add extra values (_domain, _doLocalFiles) to generated config4.0.js file. Also missing errorThrown var for util4.0.js
+	    add current directory for intro.php and other reqd .php files - to satisfy Als util4.0.js shims.
+	+ update-live-data.js: Fix broken dpct expression (overlay, not /) allow for garbage response - Send2Log if req'd.
+	    Fixes long standing $doArchiveLiveUpdates error!
+	+update-reports.sh:  Add call to flush arp cache. unknow MAC issues.
+	+ logs.css: Add unused data-title for pop-ups. Default display seems good enough for the moment.
+	+ FIXME
+	+ util4.0.js: Re-add Activ8me monthly code.
+	+ yamon4.0.js: dropped some added code - will need to relook at this and util4.0.js. Lots of people have made tweaks
+	  Its hard to keep up with what's worthwhile. This is Als current/code
+	+ FIXME
+	+ yamon4.0.html It's a mess. But a working mess. Code flow for jav is the issue, especially when using different browsers.
+
   > 2026-05-22: 4.0.8
-    + 
+    + Multiple changes.
+	+ The whole reason for forking Als code base was to allow it to fetch the files (change http-> https) to
+	+ do the actual install, and also to incorporate my local ISP in the .js code.
+	+ Bug fixes, code additions, tweaks... See the github commit history if you need to drill
+	+ down into my mind / the code.
   > 2020-01-26: 4.0.7
     + a number of changes in various files to better support Tomato (thx to tvlz for this)
 	+ fixed users_created error
