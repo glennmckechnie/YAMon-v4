@@ -7,14 +7,22 @@
 # Copyright (c) 2025 Glenn McKechnie
 # All rights reserved.
 #
-# generate /includes/paths.sh with computed paths files & logs; also computed function names(shared between one or more scripts)
-# values generated during setup & verified on startup or on demand
+# generate /includes/paths.sh with computed paths files & logs; also computed
+# function names (shared between one or more scripts) values generated during
+# setup & verified on startup or on demand
 # run: /opt/YAMon4/setPaths.sh
+
 # History
+# 2026-06-13: This file is rarely run - yet its importance rates as "essential"!
+# 	it's run in the first instance with setup4.0.8.sh and then start.sh to refresh
+# 	So when the dated entries get stale - look in here.
+# 	ChangePath() calls now add an updated tag
 # 2026-05-22: 4.0.8 - no changes
 # 2025-02-22: remove deprecated '-w -W1' from OpenWrt entry
-# 2020-01-26: 4.0.7 - removed routerfile entry from paths (as no longer used); added defensive default when checking if IPv6 is enabled
-#                   - added another check for ipv6Enabled & static leases for Tomato (thx tvlz); combined AsusMerlin & Tomato entries
+# 2020-01-26: 4.0.7 - removed routerfile entry from paths (as no longer used);
+# 	- added defensive default when checking if IPv6 is enabled
+# 	- added another check for ipv6Enabled & static leases for Tomato (thx tvlz);
+# 	- combined AsusMerlin & Tomato entries
 # 2020-01-26: 4.0.6 - added {xxx:-_} defaults in a number of spots
 # 2019-12-23: 4.0.5 - no changes
 # 2019-11-24: 4.0.4 - no changes (yet)
