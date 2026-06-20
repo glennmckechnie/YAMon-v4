@@ -2,7 +2,7 @@
 
 **2026-06-21**
 
-Multiple changes, main ones being that the **Group / Devices** code has been reworked to use the updated field in the users.js file, rework the ** "active:"0" / "1" ** fields and most importantly, prune the file of entries that are inactive and over **30 days old**.
+Multiple changes, main ones being that the **Group / Devices** code has been reworked to use the updated field in the users.js file, rework the **"active:"0" / "1"** fields and most importantly, prune the file of entries that are inactive and over **30 days old**.
 To stop making recursive symlinks - once and for all (too soon?)
 There's now a backup script that will duplicate the installation, without following the symlinks! So you get the actual files and directories as they were at capture time. Optional to unpack tarball.
 LocalCopies of newer jquery files, and alternative index.html files.
