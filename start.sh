@@ -90,7 +90,7 @@ SetWebDirectories()
 	AddSoftLink "${d_baseDir}/www/current" "${_wwwPath}current"
 	AddSoftLink "${d_baseDir}/www/yamon4.0.html" "${_wwwPath}index4.html"
 	AddSoftLink "${d_baseDir}/www/yamon4.0.7.html" "${_wwwPath}index7.html"
-	AddSoftLink "${d_baseDir}/www/yamon4.0.8.html" "${_wwwPath}index8.html"
+	AddSoftLink "${d_baseDir}/www/yamon4.0.8.html" "${_wwwPath}index.html"
 	[ "$_wwwData" == 'data3/' ] && _wwwData=''
 	AddSoftLink "${_path2data%/}" "${_wwwPath}${_wwwData:-data4}"
 	AddSoftLink "${_path2logs%/}" "${_wwwPath}logs"
