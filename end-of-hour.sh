@@ -25,9 +25,15 @@ source "${d_baseDir}/includes/shared.sh"
 source "${d_baseDir}/includes/traffic.sh"
 
 hr=$(echo $_ts | cut -d':' -f1)
+FunctionUsage "Pre-start sleeping for 59 seconds before running GetTraffic" 2 "${0##$d_baseDir/} : Main : Line Number ${LINENO}"
 sleep 59
-Send2Log "End of hour: $hr" 1  "${0##$d_baseDir/} : Main : Line Number ${LINENO}"
+FunctionUsage "Started" 2 "${0##$d_baseDir/} : Main : Line Number ${LINENO}"
 
+#FIXME - needs paths updating
+
+t_reportSpan=$(CalcReportSpan "${_updateTraffic:-4}")
+Send2Log "${0##$d_baseDir/} (traffic.sh) --> ${t_reportSpan}" 1 "${0##$d_baseDir/} Start @ Line Number ${LINENO}"
+echo -e  "${0##$d_baseDir/} (traffic.sh) --> ${t_reportSpan} 1 ${0##$d_baseDir/} Start @ Line Number ${LINENO}"  >> '/opt/YAMon4/testCounter.debug'
 GetTraffic '-vnxZ'  # get the data and zero the tables
 
 sleep 10 # delay ~10 seconds into next hour to allow tasks from previous hour to finish... might have to adjust this value
@@ -92,4 +98,4 @@ rm "$rawtraffic_hr"
 Send2Log "Disk Usage: $(IndentList "$(ps | df -Th )")" 0  "${0##$d_baseDir/} : Main : Line Number ${LINENO}"
 Send2Log "Processes: $(IndentList "$(ps | grep -v grep | grep $d_baseDir)")" 0  "${0##$d_baseDir/} : Main : Line Number ${LINENO}"
 
-LogEndOfFunction "Finished" 0 "${0##$d_baseDir/} : Main - end : Line Number ${LINENO}"
+FunctionUsage "Finished" 2 "${0##$d_baseDir/} : Main - end : Line Number ${LINENO}"
