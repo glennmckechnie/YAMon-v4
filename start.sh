@@ -10,10 +10,12 @@
 # sets up iptables entries; crontab entries, etc.
 # run: /opt/YAMon4/start.sh
 # History
+# 2026-06-19: add recovery code when rebooted. On the off chance that the data/* files are still
+# 		valid (dated correctly) they will be copied back to /tmp/yamon rather than lost.
 # 2026-06-09: add current/ for Als intro.php files (that cause all sorts of problems for local installs!)
 # 2026-06-05: Add _domain, _doLocalFiles to config4.0.js for index.html use.
 # 	      add df -h to logs (free disk space), add errorThrown to cover for empty
-# 2026-05-22: 4.0.8 - added backup recovery routine (see includes/start-stop.sh)
+# 2026-05-22: 4.0.8 - added backup recovery routine activated via pause.sh (see includes/start-stop.sh)
 # 2026-05-19: rejig AddSoftLink to ignore existing directories as well as deal with existing symlinks
 # 2025-02: symlink yamon4.0.html to index.html
 # 2020-01-26: 4.0.7 - create tmpLastSeen if it does not exist; fixed users_created error
@@ -35,8 +37,8 @@ var users_created=\"$_ds $_ts\"
 var users_updated=\"\"
 //MAC -> Groups
 
-//MAC -> IP	
-	" > $_usersFile
+//MAC -> IP
+" > $_usersFile
 }
 
 SetWebDirectories()
@@ -49,7 +51,7 @@ SetWebDirectories()
 		local configVars='_installed,_updated,_router,_firmwareName,_version,_file_version,_html_version,_firmware,_dbkey,_updateTraffic,_ispBillingDay,_wwwData,_domain,_doLocalFiles'
 
 		>"$cfgPath" #empty the file
-		
+
 		IFS=$','
 		echo "$configComnt"  >> "$cfgPath"
 		echo "$configStart"  >> "$cfgPath"
@@ -61,15 +63,15 @@ SetWebDirectories()
 		done
 	}
 	AddSoftLink(){
-		Send2Log "AddSoftLink: ln -sf $1 -> $2" 1
+		Send2Log "AddSoftLink: ln -snf $1 -> $2" 1 "${0##$d_baseDir/} : AddSoftLinkq : Line Number ${LINENO}"
 		# stop creating recursive directories! and move on if it is a directory.
 		# also redo the www link - regardless
 		if [ "$2" = "/www${_wwwURL}" ]; then
 			[ -L "$2" ] && rm -fv -- "$2"
-			ln -sf -- "$1" "$2"
+			ln -snf -- "$1" "$2"
 		elif [ ! -d "$2" ]; then
 			[ -L "$2" ] && rm -fv -- "$2"
-			ln -sf -- "$1" "$2"
+			ln -snf -- "$1" "$2"
 		fi
 	}
 	Send2Log "SetWebDirectories : start Main" 1  "${0##$d_baseDir/} : SetWebDirectories : Line Number ${LINENO}"
@@ -77,24 +79,27 @@ SetWebDirectories()
 	# [ -d "${_wwwPath}js" ] || mkdir -p "${_wwwPath}js"
 	chmod -R a+rX "${_wwwPath}"
 	#FIXME
-	# _wwwURL:/yamon _wwwPath:/tmp/www _d_baseDir:/opt/YAMon4
-	# /www /www/yamon
-	AddSoftLink "${_wwwPath}" "/www${_wwwURL}"
+	# _wwwPath:/tmp/www/  _wwwURL:/yamon  d_baseDir:/opt/YAMon4
+	# /tmp/www/yamon /www/yamon
+	AddSoftLink "${_wwwPath%/}" "/www${_wwwURL}"
 	# /opt/YAMon4/www/css /tmp/www/css
 	AddSoftLink "${d_baseDir}/www/css" "${_wwwPath}css"
 	AddSoftLink "${d_baseDir}/www/images" "${_wwwPath}images"
 	# add js path using our local files
 	AddSoftLink "${d_baseDir}/www/js" "${_wwwPath}js"
 	AddSoftLink "${d_baseDir}/www/current" "${_wwwPath}current"
-	AddSoftLink "${d_baseDir}/www/yamon4.0.html" "${d_baseDir}/www/index.html"
+	AddSoftLink "${d_baseDir}/www/yamon4.0.html" "${_wwwPath}index4.html"
+	AddSoftLink "${d_baseDir}/www/yamon4.0.7.html" "${_wwwPath}index7.html"
+	AddSoftLink "${d_baseDir}/www/yamon4.0.8.html" "${_wwwPath}index8.html"
 	[ "$_wwwData" == 'data3/' ] && _wwwData=''
 	AddSoftLink "${_path2data%/}" "${_wwwPath}${_wwwData:-data4}"
 	AddSoftLink "${_path2logs%/}" "${_wwwPath}logs"
 	AddSoftLink "$tmplogFile" "${_wwwPath}logs/latest-log.html"
-	AddSoftLink "${_path2logs%/}/${_ds}.html" "${_wwwPath}logs/day-log.html"
+	AddSoftLink "${_path2logs}${_ds}.html" "${_wwwPath}logs/day-log.html"
 	#FIXME
-	AddSoftLink "${d_baseDir}/www/yamon${_version%\.*}.html" "${_wwwPath}${_webIndex:-index.html}"
-	
+	# inclusion of various indexX.html
+	#AddSoftLink "${d_baseDir}/www/yamon${_version%\.*}.html" "${_wwwPath}${_webIndex:-index.html}"
+
 	WriteConfigFile
 	set +v +x
 	# sleep 30
@@ -106,7 +111,9 @@ source "$d_baseDir/strings/title.inc"
 
 echo -E "$_s_title"
 
+# re-run to get a fresh paths.sh
 "${d_baseDir}/setPaths.sh"
+
 tmplog='/tmp/yamon/'
 [ -d "$tmplog" ] || mkdir -p "$tmplog"
 
@@ -115,7 +122,7 @@ source "${d_baseDir}/includes/shared.sh"
 source "${d_baseDir}/includes/setupIPChains.sh"
 source "${d_baseDir}/includes/paths.sh"
 
-LogStartOfFunction "Start" 1 "${0##$d_baseDir/} : Main : Line Number ${LINENO}"
+FunctionUsage "Start" 1 "${0##$d_baseDir/} : Main : Line Number ${LINENO}"
 
 [ -f "$_lastSeenFile" ] || touch "$_lastSeenFile"
 [ -f "$tmpLastSeen" ] || touch "$tmpLastSeen"
@@ -133,26 +140,43 @@ echo -E "$_s_title" # echo the title again so it appears in the log file too :-)
 [ ! -f "$hourlyDataFile" ] && echo -e "var hourly_created=\"${_ds} ${_ts}\"\nvar hourly_updated=\"${_ds} ${_ts}\"\n" > "$hourlyDataFile"
 
 
-ln -sf $tmplog $d_baseDir
+ln -snf "$tmplog" "$d_baseDir"
 > "$macIPFile" # create and/or empty the MAC IP list files
 
-[ ! -f "$hourlyDataFile" ] &&  [ ! -f "${_path2CurrentMonth}hourly_${_ds}.js" ] && cp "${_path2CurrentMonth}hourly_${_ds}.js" "$hourlyDataFile" 
+[ ! -f "$hourlyDataFile" ] &&  [ ! -f "${_path2CurrentMonth}hourly_${_ds}.js" ] && cp "${_path2CurrentMonth}hourly_${_ds}.js" "$hourlyDataFile"
 
-if [ -f "$_lastSeenFile" ] ; then 
-	cp "${_lastSeenFile}" "$tmpLastSeen" 
+if [ -f "$_lastSeenFile" ] ; then
+	cp "${_lastSeenFile}" "$tmpLastSeen"
 	cp "$_lastSeenFile" "${_lastSeenFile/.js/-${_ds}-${_ts}.js}"
 fi
 
 [ -z "$1" ] && rebootOrStart='Script Restarted' || rebootOrStart='Server Rebooted'
+#if [ -z "$1" ]; then
+#	# plain 'sh start.sh' or '/etc/init.d/yamon4 boot'
+#	rebootOrStart='Script Restarted'
+#else
+#	# reboot message from '/etc/init.d/yamon start' (restart)
+#	rebootOrStart='Server Rebooted'
+#	cp "${_path2CurrentMonth}${hourlyDataFile##/}" "$hourlyDataFile"  >/dev/null 2>&1
+#	cp "$_lastSeenFile" "$tmpLastSeen"  >/dev/null 2>&1
+#	cp "${_path2CurrentMonth}${rawtraffic_hr##/}" "$rawtraffic_hr"  >/dev/null 2>&1
+#	#cp "${rawtraffic_day}" "/tmp/yamon/${rawtraffic_day##*$_path2CurrentMonth}"  >/dev/null 2>&1
+#	cp  "$rawtraffic_day" "${tmpLastSeen%/*}/${rawtraffic_day##*/}"  >/dev/null 2>&1
+#fi
+
+
 echo -e "//$rebootOrStart" >> "$hourlyDataFile"
 Send2Log "YAMon:: $rebootOrStart" 2 "${0##$d_baseDir/} : Main : Line Number ${LINENO}"
 Send2Log "YAMon:: version $_version	_loglevel: $_loglevel" 1 "${0##$d_baseDir/} : Main : Line Number ${LINENO}"
 if [ -f "$_usersFile" ] ; then
 	if [ -z "$(cat "$_usersFile" | grep "^var users_updated")" ] ;  then
-		Send2Log "Start: adding users_updated to $_usersFile" 2 "${0##$d_baseDir/} : Main : Line Number ${LINENO}"
+		Send2Log "Start: touch users_updated in $_usersFile" 2 "${0##$d_baseDir/} : Main : Line Number ${LINENO}"
 		ucl=$(cat "$_usersFile" | grep "^var users_created")
 		sed -i "s~$ucl~$ucl\nvar users_updated=\"\"~" "$_usersFile"
 	fi
+	# Despite uprev.sh being run, this doesn't get updated - nor will it ever.
+	# not worth checking - just replace it.
+	sed -i "s~users_version=\"[^\"]\{0,\}\"~users_version=\"$_version\"~" "$_usersFile"
 else
 	CreateUsersFile
 fi
@@ -183,4 +207,4 @@ CheckIntervalFiles
 
 StartScheduledJobs
 
-LogEndOfFunction "Finished" 1 "${0##$d_baseDir/} : Main : Line Number ${LINENO}"
+FunctionUsage "Finished" 1 "${0##$d_baseDir/} : Main : Line Number ${LINENO}"
