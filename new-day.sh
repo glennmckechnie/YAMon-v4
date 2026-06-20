@@ -8,7 +8,9 @@
 # run scripts needed at the start of a new day
 # run: by cron
 # History
+# 2026-06-13: Add missing _liveArchiveFilePath update line.
 # 2026-06-09: 4.0.8 - Add logging statements, move html headers to shared.sh
+# 2025-04:    Add day to "// Hour t_day-hr" stamp
 # 2020-01-26: 4.0.7 - no changes
 # 2020-01-03: 4.0.6 - no changes
 # 2019-12-23: 4.0.5 - added symlinks for day and hour logs 
@@ -19,16 +21,37 @@
 
 d_baseDir=$(cd "$(dirname "$0")" && pwd)
 source "${d_baseDir}/includes/shared.sh"
-LogEndOfFunction "Main-start" 3 "${0##$d_baseDir/} : Main : Line Number ${LINENO}"
-ChangePath 'rawtraffic_day' "${_path2CurrentMonth}raw-traffic-$_ds.txt"
+FunctionUsage "Main-start" 3 "${0##$d_baseDir/} : Main : Line Number ${LINENO}"
+
 hourlyDataFile="${tmplog}hourly_${_ds}.js"
 dailyLogFile="${_path2logs}${_ds}.html"
+ChangePath 'rawtraffic_day' "${_path2CurrentMonth}raw-traffic-$_ds.txt"
 ChangePath 'hourlyDataFile' "$hourlyDataFile"
+ChangePath '_liveArchiveFilePath' "${_path2CurrentMonth}${_ds}-live_data4.js"
 ChangePath 'dailyLogFile' "$dailyLogFile"
+# FIXME - delete when ready
+#if [ ! -f "$hourlyDataFile" ] ; then
+#	echo -e "var hourly_created=\"${_ds} ${_ts}\"\nvar hourly_updated=\"${_ds} ${_ts}\"\nvar disk_utilization=\"\"\nvar serverUptime=\"$_uptime\"\nvar freeMem=\"\",availMem=\"\",totMem=\"\"" > "$hourlyDataFile"
+#fi
+#if [ ! -f "$g_hourly_data_js_file" ] ; then
+# Glenn McKechnie - modified 13/06/26 18:31
+# # /mnt/nvme0n1/0000AAAA-CurrentAsOf-20260522/YAMon4-20250116
+
 if [ ! -f "$hourlyDataFile" ] ; then
-	echo -e "var hourly_created=\"${_ds} ${_ts}\"\nvar hourly_updated=\"${_ds} ${_ts}\"\nvar disk_utilization=\"\"\nvar serverUptime=\"$_uptime\"\nvar freeMem=\"\",availMem=\"\",totMem=\"\"" > "$hourlyDataFile"
+  t_day=$(date +"%d")
+  # Glenn McKechnie - modified 30/04/25 20:58.
+  t_ts=$(date +"%T") # Temporary debug
+  # NEW as per output style
+  printf "%s" "var hourly_created=\"${_ds} ${_ts}\"
+var hourly_updated=\"${_ds} ${_ts}\"
+var disk_utilization=\"\"
+var serverUptime=\"$_uptime\"
+var freeMem=\"\",availMem=\"\",totMem=\"\"
+
+// Hour: 00 (${t_day}--${t_ts})" > "$hourlyDataFile"
 fi
 Send2Log "new-day: $_ds / $hourlyDataFile" 1 "${0##$d_baseDir/} : Main : Line Number ${LINENO}"
+# FIXME - delete when ready
 # g_daily_log_file=/opt/YAMon4/logs/2025-03-28.html
 #    dailyLogFile='/opt/YAMon4/logs/2026-06-03.html'
 # g_rawtraf_day_file='/opt/YAMon4/data/2025/03/raw-traffic-2025-03-31.txt'
@@ -66,4 +89,4 @@ oll="${_wwwPath}logs/day-log.html"
 ln -s "$nll" "$oll"
 Send2Log "new-day: day log changed from oll --> nll  $oll --> $nll" 1  "${0##$d_baseDir/} : Main : Line Number ${LINENO}"
 
-LogEndOfFunction "Finished" 3 "${0##$d_baseDir/} : Main : Line Number ${LINENO}"
+FunctionUsage "Finished" 3 "${0##$d_baseDir/} : Main : Line Number ${LINENO}"
