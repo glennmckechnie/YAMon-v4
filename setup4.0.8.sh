@@ -248,7 +248,8 @@ fi
 
 _configFile="${d_baseDir}/config.file"
 
-[ ! -f "${d_baseDir}/includes/paths.sh" ] && $(${d_baseDir}/setPaths.sh)
+# output not req'd # [ ! -f "${d_baseDir}/includes/paths.sh" ] && $(${d_baseDir}/setPaths.sh)
+[ ! -f "${d_baseDir}/includes/paths.sh" ] && "${d_baseDir}/setPaths.sh"
 
 showEcho=1 # to prevent redirection of all output to the logs
 source "${d_baseDir}/includes/shared.sh"
@@ -539,6 +540,7 @@ if [ "$t_installmode" == 'b' ] ; then
 else
 
 	Prompt '_updateTraffic' 'How frequently would you like to check the traffic data?' 'Enter the interval in minutes [1-30 min]' '4' "^([1-9]|[12][0-9]|30)$"
+	Prompt '_usebydate' 'Entries in users.js will expire if inactive and older than 30 days' 'The default is 30 days, or enter a new number?' '30' "^([1-9]|[12345][0-9]|60)$"
 	t_wid=1
 	Prompt 't_wid' "Do you want to store your data in the default directory?
       - i.e., \`$d_baseDir/data\`" "$yn_y" $t_wid $zo_r
@@ -568,8 +570,8 @@ else
 	Prompt '_wwwURL' "Specify the URL path to the reports - e.g. $lan_ip\`<path>\`?" "  \`<path>\` must start and end with a \`/\`.  
       NB - enter just the path & do *NOT* include the IP address!" "$_wwwURL" $re_path_slash
 	if [ "$_firmware" == "1" ] && [ -d '/www' ] ; then
-	     # specifically for an 'openwrt one'
-	     ln -sf -- "${_wwwPath}" "/www${_wwwURL}"
+	     # specifically for an 'openwrt one'?
+	     ln -snf -- "${_wwwPath%/}" "/www${_wwwURL}"
         fi
 
 	Prompt '_includeBridge' "Do you have a bridge on your network?${_nlsp}(i.e., a second router or other device to extend the wireless range)" "$yn_n" '0' $zo_r
@@ -744,7 +746,8 @@ echo -e "${_nl}${los}${_nl}Setup is (finally) complete!!!
 
 One last thing to do before restarting the new version... 
 Prior versions of YAMon v4 may have introduced some errors in various
-files."
+files.
+This is NOT required for a fresh installation of YAMon4"
 
 Prompt 't_fix' 'Do you run the fixes script now?  It might take a couple minutes to complete...' "$yn_n" '0' $zo_r
 if [ "$t_fix" == "1" ] ; then
@@ -753,7 +756,8 @@ if [ "$t_fix" == "1" ] ; then
 fi
 
 
-Prompt 't_launch' 'Do you want to launch YAMon now?' "$yn_y" '1' $zo_r
+#Prompt 't_launch' 'Do you want to launch YAMon now?' "$yn_y" '1' $zo_r
+t_launch='1'
 if [ "$t_launch" == "1" ] ; then
 	SetupLog "Launched " 2
 	echo -e "${_nl}${los}${_nl}[Re]starting YAMon$_version${_nl}"
