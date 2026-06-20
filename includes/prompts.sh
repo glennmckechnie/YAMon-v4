@@ -7,7 +7,7 @@
 #
 # History
 # Glenn McKechnie - modified 03/06/26
-# 2026-06-03: rework varNames and add _domain default 
+# 2026-06-03: rework varNames and add _domain default
 # 2026-05-22: 4.0.8 - no changes
 # 2020-01-26: 4.0.7 - no changes
 # 2020-01-03: 4.0.6 - added pad_length in UpdateConfig

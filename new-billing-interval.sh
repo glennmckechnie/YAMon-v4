@@ -29,7 +29,7 @@ da=$(echo $newBillingDate | cut -d'-' -f3)
 [ "${da#0}" == "$_ispBillingDay" ] || echo "New Billing Interval: current date (${da#0}) does not match _ispBillingDay ($_ispBillingDay)... exitting!" 2 || exit 0
 
 _currentInterval="${yr}-${mo}"
-Send2Log "New Billing Interval: $_currentInterval" 2
+Send2Log "New Billing Interval: $_currentInterval" 2 "${0##$d_baseDir/} : Main : Line Number ${LINENO}"
 _path2CurrentMonth="${_path2data}${_currentInterval/-//}/"
 _intervalDataFile="$_path2CurrentMonth${_currentInterval}-mac_usage.js"
 
@@ -42,4 +42,4 @@ CheckIntervalFiles
 # purge old files
 [ "$_purgeOldFiles" -eq "1" ] && "${d_baseDir}/purge.sh"
 
-LogEndOfFunction
+FunctionUsage "Finish" 3 "${0##$d_baseDir/} : Main : Line Number ${LINENO}"

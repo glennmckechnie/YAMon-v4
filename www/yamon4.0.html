@@ -8,15 +8,15 @@
 		<title>YAMon:: Usage monitoring by group and device...</title>
 		<meta name="description" content="Internet Usage Statistics" />
 		<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
-		<script src="js/config4.0.js"></script>
-		<!-- script src="http://192.168.1.1/yamon/current/js/config4.0.js"></script -->
-		<script src="js/jquery.min.js"></script>
-		<!-- script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script -->
+		<script type="text/javascript" src="js/config4.0.js"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 		<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
-		<!-- script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script -->
-		<!-- script defer type="text/javascript">
+		<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+		<script defer type="text/javascript">
+			var _html_version='4.0'
+			var _file_version='4.0'
 			var args=window.location.search.replace('?','').split('&'),ver=args[1]||_file_version,domain='',path=''
-			if(!(localStorage.getItem('devOrCurr')==='dev')){
+			if(typeof(_doLocalFiles)=='undefined'||_doLocalFiles=='0'){
 				path = (localStorage.getItem('devOrCurr') || 'current') + '/'
 				domain='https://usage-monitoring.com/'
 			}
@@ -34,120 +34,12 @@
 			$.ajaxSetup({'cache':localStorage.getItem('ajaxCache')=='true'});  //Comment out this line if your router requires timestamps appended to data URLs
 			google.charts.load('current', {'packages':['corechart', 'gauge']});
 			$(document).ready(function(){
-				$.ajax({crossDomain: true, url: domain + path + 'js/util' + ver+ '.js',dataType: "script", cache:true})
-//					.done(function(){
-				$.ajax({crossDomain: true, url: domain + path + 'js/yamon' + ver+ '.js',dataType: "script", cache:true});
-//					});
+				$.ajax({crossDomain: true, url: domain + path + 'js/util' + ver+ '.js',dataType: "script", cache:false})
+					.done(function(){
+						$.ajax({crossDomain: true, url: domain + path + 'js/yamon' + ver+ '.js',dataType: "script", cache:false});
+					});
 			})
-			  // cache flag default
-			  if (!localStorage.getItem('ajaxCache')) localStorage.setItem('ajaxCache','true');
-			  // load util then yamon
-			  function loadScript(url){ return new Promise(function(resolve,reject){
-			  });
-			  }
-			  loadScript(domain + '/' + path + 'js/util' + _file_version + '.js')
-			    .then(function(){ return loadScript(domain + '/' + path + 'js/yamon' + _file_version + '.js'); })
-			    .catch(function(err){ console.error('script load error', err); });
-			</script -->
-			<script defer type="text/javascript">
-(function(){
-//-  Glenn McKechnie - modified 05/06/26 21:57 
-// set default environment on first run
- /*(function(){  
- var key = 'devOrCurr';  
- try {    
- if (localStorage.getItem(key) === null) {
- // set default: use 'dev' or 'current' or 'staging' as you prefer
- localStorage.setItem(key, 'dev'); // <-- change 'dev' to your desired default
- }
- } catch (e) {
- // localStorage unavailable (private mode, etc.) — ignore silently  
-  }
-  })();*/
-  // preserve existing arg/localStorage logic
-//  console.log("ndomain", ndomain)
-  //console.log("domain", domain)
-  //console.log("_domain", _domain)
-  //var _doLocalFiles='0'                                                                                                                                                
-  //console.log( "_dolocalFiles",  _doLocalFiles)                                                                                                                          
- // if(typeof(_doLocalFiles)=='undefined'||_doLocalFiles=='0'){                                                                                                            
-   // path = (localStorage.getItem('devOrCurr') || 'current') + '/'                                                                                                  
-   // domain='https://usage-monitoring.com/'                                                                                                                         
-  //}
-  //console.log( "_dolocalFiles",  _doLocalFiles)                                                                                                                          
- var args = window.location.search.replace('?','').split('&'), ver = args[1] || _file_version, domain = '', path = '';
-// if (!(localStorage.getItem('devOrCurr') === 'dev')) {
-  if(typeof(_doLocalFiles)=='undefined'||_doLocalFiles=='0'){                                                                                                            
-    path = (localStorage.getItem('devOrCurr') || 'current') + '/';
-    domain = _domain;
-    //domain = 'https://usage-monitoring.com/';
-   // domain = 'http://myweewx.localdomain/';
-  //console.log("_domain", _domain)
-  }
-  
-  // expose globals so loaded scripts can access them synchronously
-window.domain = domain || '';
-window.path = path || '';
-//console.log("domain>", domain,"path>",path)
-window._file_version = typeof _file_version !== 'undefined' ? _file_version : (ver || '');
-
-  // inject styles and favicon (unchanged behavior)
-  $("<link/>", { rel: "stylesheet", type: "text/css", href: domain + path + 'css/normalize.css' }).appendTo("head");
-  $("<link/>", { rel: "stylesheet", type: "text/css", href: domain + path + 'css/yamon' + ver + '.css' }).appendTo("head");
-  $("<link/>", { rel: "shortcut icon", href: domain + path + 'images/favicon.png' }).appendTo("head");
-
-  // Promise-based loader for scripts
-  function loadScript(url, opts) {
-    opts = opts || {};
-    return new Promise(function(resolve, reject){
-      var s = document.createElement('script');
-      s.src = url;
-      if (opts.async === false) s.async = false;
-      s.onload = function(){ resolve(url); };
-      s.onerror = function(){ reject(new Error('Failed to load ' + url)); };
-      document.head.appendChild(s);
-    });
-  }
-
-  // ensure ajax cache setting still applied
-  if (!localStorage.getItem('ajaxCache')) localStorage.setItem('ajaxCache', 'true');
-  $.ajaxSetup({ 'cache': localStorage.getItem('ajaxCache') == 'true' });
-
-  // load jquery.md5 first (was previously ajax; keep same file but ensure completion)
-  var md5url = domain + path + 'js/jquery.md5.min.js';
-
-  // Load google loader, then call google.charts.load once, wait until charts ready,
-  // then load local util and yamon in sequence.
-  var loaderUrl = 'https://www.gstatic.com/charts/loader.js';
- // var loaderUrl = domain + path + 'js/loader.js';
-  var utilUrl = domain + path + 'js/util' + ver + '.js';
-  var yamonUrl = domain + path + 'js/yamon' + ver + '.js';
-
-  // Start sequence
-  Promise.resolve()
-    // load md5 (if required)
-    .then(function(){ return loadScript(md5url).catch(function(){ /* non-fatal */ }); })
-    // load google loader
-    .then(function(){ return loadScript(loaderUrl); })
-    // call google.charts.load exactly once for needed packages
-    .then(function(){
-      // Use a single load call for both packages
-      google.charts.load('current', { packages: ['corechart', 'gauge'] });
-      // Wait for google charts to be ready
-      return new Promise(function(res){
-        google.charts.setOnLoadCallback(res);
-      });
-    })
-    // load util then yamon sequentially
-    .then(function(){ return loadScript(utilUrl); })
-    .then(function(){ return loadScript(yamonUrl); })
-    .catch(function(err){
-      console.error('script load sequence error:', err);
-    });
-
-})();
-</script>
-
+		</script>
 
 		<link rel="stylesheet" type="text/css" href="css/custom.css"/>
 	</head>
@@ -190,13 +82,13 @@ window._file_version = typeof _file_version !== 'undefined' ? _file_version : (v
 			</section>
 			<section id='main-body' class='p-r'>
 				<div class='_detanod' amount=20 title='Thank you in advance for your support!'>
-					<!--div class='submenu'>
+					<div class='submenu'>
 						<span class='amount btn' amount=10 title='Donate $10'>$10</span>
 						<span class='amount btn' amount=15 title='Donate $15'>$15</span>
 						<span class='amount btn' amount=20 title='Donate $20... thanks!'>$20</span>
 						<span class='amount btn' amount=25 title='Donate $25 - wow!!!'>$25</span>
 						<span class='amount btn' amount='' title='Select this option to choose your own amount'>Other...</span>
-					</div -->
+					</div>
 				</div>
 				<div id='error-notification' class='p-r'>
 					<h1>This text will go away once all of the data has loaded.</h1>
@@ -620,17 +512,17 @@ window._file_version = typeof _file_version !== 'undefined' ? _file_version : (v
                                     <th class='AM'>10</th>
                                     <th class='AM'>11</th>
                                     <th class='PM'>12</th>
-                                    <th class='PM'>13</th>
-                                    <th class='PM'>14</th>
-                                    <th class='PM'>15</th>
-                                    <th class='PM'>16</th>
-                                    <th class='PM'>17</th>
-                                    <th class='PM'>18</th>
-                                    <th class='PM'>19</th>
-                                    <th class='PM'>20</th>
-                                    <th class='PM'>21</th>
-                                    <th class='PM'>22</th>
-                                    <th class='PM'>23</th>
+                                    <th class='PM'>1</th>
+                                    <th class='PM'>2</th>
+                                    <th class='PM'>3</th>
+                                    <th class='PM'>4</th>
+                                    <th class='PM'>5</th>
+                                    <th class='PM'>6</th>
+                                    <th class='PM'>7</th>
+                                    <th class='PM'>8</th>
+                                    <th class='PM'>9</th>
+                                    <th class='PM'>10</th>
+                                    <th class='PM'>11</th>
                                 </tr>
                                 <tr class='hourly-row hidden'>
                                     <td class='group-name'>-</td>
@@ -1151,9 +1043,9 @@ window._file_version = typeof _file_version !== 'undefined' ? _file_version : (v
 							</fieldset>
 							<fieldset>
 								<legend>Debug</legend>
-								<p title="When using the https://usage-monitoring.com server, use either dev/ or current/ files.">
+								<p title="Use files from /dev rather than /current">
 									<input type="checkbox" id="devOrCurr">
-									<label for="devOrCurr">Choose which directory for the remote JS & CSS files</label>
+									<label for="devOrCurr">Use `/dev` JS & CSS files</label>
 								</p>
 								<p title="Set ajaxSetup cache to true (***recommended***)">
 									<input type="checkbox" id="ajaxCache">
@@ -1330,18 +1222,17 @@ window._file_version = typeof _file_version !== 'undefined' ? _file_version : (v
 					<p>Version:<span class='scriptVersion'></span></p>
 
 					<hr/>
-					<p>The original online help, FAQs, etc. is at</p>
+					<p>For online help, FAQs, etc. either go to:</p>
 					<ul>
-						<li><a href='https://usage-monitoring.com/help' target='_blank'>https://usage-monitoring.com/help</a></li>
-					</ul>
-					<p>Help for this fork is available at github via...</p>
-					<ul>
-						<li><a href='https://github.com/glennmckechnie/YAMon-v4' target='_blank'>https://github.com/glennmckechnie/YAMon-v4</a></li>
+						<li><a href='https://usage-monitoring.com' target='_blank'>https://usage-monitoring.com</a></li>
+						<li><a href='http://www.dd-wrt.com/phpBB2/viewtopic.php?p=1050090' target='_blank'>the YAMon 3.x forum at DD-WRT</a></li>
+						<li><a href='http://www.dd-wrt.com/phpBB2/viewtopic.php?t=259806' target='_blank'>the YAMon 2,x forum at DD-WRT</a></li>
 					</ul>
 
+					<p>Otherwise, if you have any questions/suggestions or find an error, drop me a <a href="mailto:questions@usage-monitoring.com?subject=Yet Another Monitor Questions%2FComments">line</a>.  I'll do my best to respond ASAP!</p>
 					<hr/>
-					<p>YAMon is based upon: <a href='http://code.google.com/p/wrtbwmon/' target='_blank'>wrtbwmon</a> by Emmanuel Brucy &amp;  <a href='http://code.google.com/p/lal-projects/' target='_blank'>bw_monitor</a> by FezJay; and, adapted from modifications by: `bpsmicro`,`OrionShock` &amp; others.  Thanks to `spanman` and too many others to mention here who've made suggestion for features &mp; GUI improvements and/or patiently helped me find and resolve bugs</p>
-					<p>Thanks also to everyone who's made a <a href='https://usage-monitoring.com/donations.php'>donation</a></p>
+					<p>YAMon is based upon: <a href='http://code.google.com/p/wrtbwmon/' target='_blank'>wrtbwmon</a> by Emmanuel Brucy &  <a href='http://code.google.com/p/lal-projects/' target='_blank'>bw_monitor</a> by FezJay; and, adapted from modifications by: `bpsmicro`,`OrionShock` & others.  Thanks to `spanman` and too many others to mention here who've made suggestion for features & GUI improvements and/or patiently helped me find and resolve bugs</p>
+					<p>Thanks also to everyone who's made a <a href='https://usage-monitoring.com/donations.php'>donation</a>... I *really* appreciate those!  In case it is not blatantly obvious, you can make donations via Paypal.</p>
 				</div>
 				<div id='myAlert' class='dlog hidden'>
 					<p>Alert

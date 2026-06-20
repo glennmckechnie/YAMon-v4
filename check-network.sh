@@ -25,6 +25,7 @@ d_baseDir=$(cd "$(dirname "$0")" && pwd)
 source "${d_baseDir}/includes/shared.sh"
 source "${d_baseDir}/includes/start-stop.sh"
 
+FunctionUsage "Starting" 2 "${0##$d_baseDir/} : Main start : Line Number-${LINENO}"
 Send2Log "Checking the network for new devices" 1 "${0##$d_baseDir/} : Main start : Line Number-${LINENO}"
 _IPCmd='ip neigh show'
 
@@ -32,23 +33,23 @@ _IPCmd='ip neigh show'
 excluding='FAILED,STALE,INCOMPLETE,00:00:00:00:00:00' # excludes listed entries from the results
 arpResults=$(cat /proc/net/arp | grep "^[1-9]"| tr "[A-Z]" "[a-z]")
 #$(IndentList "$iplist")"
-Send2Log "Checking the network - arpResults $(IndentList "$arpResults")" 4 "${0##$d_baseDir/} : Main start : Line Number-${LINENO}"
+Send2Log "Checking the network - arpResults $(IndentList "$arpResults")" 1 "${0##$d_baseDir/} : Main start : Line Number-${LINENO}"
 #echo -e "\narpResults"
 #echo "$arpResults"
 # switch '-i' to enforce case insenstivity
 arpList=$(echo "$arpResults" | grep -Eiv "(${excluding//,/|})" | awk '{ print $4,$1 }')
-Send2Log "Checking the network - arpList $(IndentList " $arpList")" 4 "${0##$d_baseDir/} : Main start : Line Number-${LINENO}"
+Send2Log "Checking the network - arpList $(IndentList " $arpList")" 1 "${0##$d_baseDir/} : Main start : Line Number-${LINENO}"
 #echo -e "\narpList"
 #echo "$arpList"
 [ -n "$arpList" ] && Send2Log "Check4NewDevices: arpList: $(IndentList "$arpList")" 4 "${0##$d_baseDir/} : Main start : Line Number-${LINENO}"
 
 ipResults=$($_IPCmd | tr "[A-Z]" "[a-z]") # a hack for firmware variants which do not include the full ip command (so `ip neigh show` does not return valid info)
-Send2Log "Checking the network - ipResults $(IndentList "$ipResults")" 4 "${0##$d_baseDir/} : Main start : Line Number-${LINENO}"
+Send2Log "Checking the network - ipResults $(IndentList "$ipResults")" 1 "${0##$d_baseDir/} : Main start : Line Number-${LINENO}"
 #echo -e "\nipResults"
 #echo "$ipResults"
 # switch '-i' to enforce case insenstivity
 ipList=$(echo "$ipResults" | grep -Eiv "(${excluding//,/|})" | awk '{ print $5,$1 }')
-Send2Log "Checking the network - ipList $(IndentList "$ipList")" 4 "${0##$d_baseDir/} : Main start : Line Number-${LINENO}"
+Send2Log "Checking the network - ipList $(IndentList "$ipList")" 1 "${0##$d_baseDir/} : Main start : Line Number-${LINENO}"
 #echo -e "\nipList"
 #echo "$ipList"
 #[ -n "$ipList" ] && Send2Log "Check4NewDevices: ipList: $(IndentList "$ipList")" 0 "${0##$d_baseDir/} : Main start : Line Number-${LINENO}"
@@ -233,4 +234,4 @@ Check4NewDevices
 
 CheckMacIP4Duplicates
 
-LogEndOfFunction "Finished" 1 "${0##$d_baseDir/} : Main - end : Line Number-${LINENO}"
+FunctionUsage "Finished" 2 "${0##$d_baseDir/} : Main - end : Line Number-${LINENO}"

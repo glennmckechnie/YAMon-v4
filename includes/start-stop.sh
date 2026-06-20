@@ -9,7 +9,7 @@
 # run: /opt/YAMon4/start.sh
 # History
 # 2026-06-09: 4.0.8 Add logging extras
-# 2026-05-22: added backup recovery routine (see start.sh)
+# 2026-05-22: added backup recovery routine activated from pause.sh
 # 2025-02-24: GMcK
 #   Replace StopCronJobs: entries are commented out and will be re-enabled on a
 #   start.sh reboot. No need to stop cron. Hopefully this will reduce the file
@@ -28,7 +28,7 @@
 #
 ##########################################################################
 
-Send2Log "start-stop" 1 "${0##$d_baseDir/} : Main-start : Line Number-${LINENO}"
+Send2Log "start-stop" 2 "${0##$d_baseDir/} : Main-start : Line Number ${LINENO}"
 #set -v -x
 
 if [ "$_firmware" -eq "0" ] ; then
@@ -37,7 +37,7 @@ if [ "$_firmware" -eq "0" ] ; then
 	stopService="stopservice $wc root"
 	startService="startservice $wc root"
 elif [ "$_firmware" -eq "2" ] || [ "$_firmware" == "3" ] || [ "$_firmware" -eq "5" ] ; then #Tomato, AsusMerlin & variants
-	Send2Log "Do nothing Firmware uses cru" 0 "${0##$d_baseDir/} : Main-start : Line Number-${LINENO}" #Need something here or complaint of else on next line
+	Send2Log "Do nothing Firmware uses cru" 0 "${0##$d_baseDir/} : Main-start : Line Number ${LINENO}" #Need something here or complaint of else on next line
 else
 	cronJobsFile=/etc/crontabs/root
 	stopService="/etc/init.d/cron stop"
@@ -46,12 +46,12 @@ fi
 
 ResetCron(){
 	#to do --> confirm paths for other firmware variants... works in Turris & dd-wrt
-	Send2Log "ResetCron: $stopService / $startService" 1 "${0##$d_baseDir/} : Reset Cron : Line Number-${LINENO}"
+	Send2Log "ResetCron: $stopService / $startService" 1 "${0##$d_baseDir/} : Reset Cron : Line Number ${LINENO}"
 	$stopService 2>/dev/null #redirecting spurious error messages to /dev/null
-	Send2Log "Cron should be stopped : $(ps | grep [c]ron)" 2 "${0##$d_baseDir/} : Reset Cron : Line Number-${LINENO}"
 	sleep 1
+	Send2Log "Cron should be stopped : $(ps | grep [c]ron)" 2 "${0##$d_baseDir/} : Reset Cron : Line Number ${LINENO}"
 	$startService 2>/dev/null #redirecting spurious error messages to /dev/null
-	Send2Log "Cron should now be running : $(ps | grep [c]ron)" 2 "${0##$d_baseDir/} : Reset Cron : Line Number-${LINENO}"
+	Send2Log "Cron should now be running : $(ps | grep [c]ron)" 2 "${0##$d_baseDir/} : Reset Cron : Line Number ${LINENO}"
 }
 
 StartScheduledJobs(){
@@ -98,7 +98,7 @@ StartScheduledJobs(){
 		newjobs="${newjobs}\n#End of YAMon jobs: (updated $_crds)"
 		
 		echo -e "$newjobs" > "$cronJobsFile"
-		Send2Log "SetCronJobs: updating \`$cronJobsFile\` --> $(IndentList "$newjobs")" 1 "${0##$d_baseDir/} : SetCronJobs : Line Number-${LINENO}"
+		Send2Log "SetCronJobs: updating \`$cronJobsFile\` --> $(IndentList "$newjobs")" 1 "${0##$d_baseDir/} : SetCronJobs : Line Number ${LINENO}"
 	}
 
 	SetCruJobs(){ #for Tomato (and other firmware using cru rather than cron)
@@ -121,10 +121,10 @@ StartScheduledJobs(){
 		[ "$_doLiveUpdates" -eq "1" ] && cru a yamon8 "* * * * * ${d_baseDir}/update-live-data.sh"
 		local udt=${_updateTraffic:-4}
 		cru a yamon9 "$udt-$((60 - $udt))/$udt * * * * ${d_baseDir}/update-reports.sh"
-		Send2Log "Setting cru jobs for: $(IndentList "$(cru l | grep 'yamon')")" 0 "${0##$d_baseDir/} : SetCruJobs : Line Number-${LINENO}"
+		Send2Log "Setting cru jobs for: $(IndentList "$(cru l | grep 'yamon')")" 0 "${0##$d_baseDir/} : SetCruJobs : Line Number ${LINENO}"
 	}
 
-	Send2Log "StartScheduledJobs - started..." 0 "${0##$d_baseDir/} : StartScheduledJobs  : Line Number-${LINENO}"
+	Send2Log "StartScheduledJobs - started..." 0 "${0##$d_baseDir/} : StartScheduledJobs  : Line Number ${LINENO}"
 	if [ "$_firmware" -eq "3" ] || [ "$_firmware" -eq "2" ] || [ "$_firmware" -eq "5" ]; then
 		local scheduler='cru'
 		SetCruJobs
@@ -133,7 +133,7 @@ StartScheduledJobs(){
 		SetCronJobs
 		ResetCron
 	fi
-	Send2Log "The YAMon jobs have been scheduled in \`$scheduler\`... run ${d_baseDir}/pause.sh to pause or stop the scripts" 2 "${0##$d_baseDir/} : StartScheduledJobs  : Line Number-${LINENO}"
+	Send2Log "The YAMon jobs have been scheduled in \`$scheduler\`... run ${d_baseDir}/pause.sh to pause or stop the scripts" 2 "${0##$d_baseDir/} : StartScheduledJobs  : Line Number ${LINENO}"
 }
 StopScheduledJobs(){
 	StopCronJobs(){
@@ -144,7 +144,7 @@ StopScheduledJobs(){
 		newjobs=$( awk '/#Start of YAMon jobs/,/#End of YAMon jobs/ { sub(/^/, "#"); } { print }' < $cronJobsFile)
 		newjobs="${newjobs}\n#Stopping YAMon jobs: (updated $_crds)"
 		echo -e "$newjobs" > "$cronJobsFile"
-		Send2Log "StopCronJobs by disabling YAMon entries: $(IndentList "$nfc")" 1 "${0##$d_baseDir/} : StopCronJobs : Line Number-${LINENO}"
+		Send2Log "StopCronJobs by disabling YAMon entries: $(IndentList "$nfc")" 1 "${0##$d_baseDir/} : StopCronJobs : Line Number ${LINENO}"
 		# and we let them finish in there own time rather than also Stopping Cron ?
 		#FIXME
 		# Glenn McKechnie - modified 24/05/26 15:17
@@ -165,7 +165,7 @@ StopScheduledJobs(){
 		unset $IFS
 		echo -e "$nfc" > $cronJobsFile
 
-		Send2Log "StopCronJobs: $(IndentList "$nfc")" 1 "${0##$d_baseDir/} : StopCronJobs : Line Number-${LINENO}"
+		Send2Log "StopCronJobs: $(IndentList "$nfc")" 1 "${0##$d_baseDir/} : StopCronJobs : Line Number ${LINENO}"
 		ResetCron
 	}
 
@@ -178,7 +178,7 @@ StopScheduledJobs(){
 			cru d "$jn"
 		done
 		unset $IFS
-		Send2Log "StopCruJobs: $(IndentList "$(cru l | grep 'yamon')")" 1 "${0##$d_baseDir/} : StopCruJobs  : Line Number-${LINENO}"
+		Send2Log "StopCruJobs: $(IndentList "$(cru l | grep 'yamon')")" 1 "${0##$d_baseDir/} : StopCruJobs  : Line Number ${LINENO}"
 	}
 	
 	if [ "$_firmware" -eq "3" ] || [ "$_firmware" -eq "2" ] || [ "$_firmware" -eq "5" ]; then
@@ -188,13 +188,13 @@ StopScheduledJobs(){
 		local scheduler='cron'
 		StopCronJobs
 	fi
-	Send2Log "The YAMon jobs in \`$scheduler\` have been paused... run ${d_baseDir}/start.sh to restart the scripts" 99 "${0##$d_baseDir/} : StopScheduledJobs : Line Number-${LINENO}"
+	Send2Log "The YAMon jobs in \`$scheduler\` have been paused... run ${d_baseDir}/start.sh to restart the scripts" 99 "${0##$d_baseDir/} : StopScheduledJobs : Line Number ${LINENO}"
 
-	# make a backup of the existing data
+	# make a backup of the existing data memory based data. Overwrite existing files (keep current).
 	_backup="${d_baseDir}/data/yamon-$(date +%Y%m%d)"
 	[ -d "${_backup}" ] || mkdir -p "${_backup}"
 	cp -af "${tmplog}/." "${_backup}/"
-	Send2Log "Created copy of current files in $_backup" 0 "${0##$d_baseDir/} : StopScheduledJobs : Line Number-${LINENO}" 
+	Send2Log "Created copy of current files in $_backup" 0 "${0##$d_baseDir/} : StopScheduledJobs : Line Number ${LINENO}" 
 }
 SetAccessRestrictions(){
 	local fileContents=$(cat "$cronJobsFile")
@@ -217,10 +217,10 @@ SetAccessRestrictions(){
 	wget "$prototol$url" $security_protocol -qO "$dst"
 	local ac_jobs=$(cat $dst | sed -e "s~<user>~$user~" -e "s~<path>~$d_baseDir/~")
 	if [ -n "$(echo "$ac_jobs" | grep "^Error")" ] ; then
-		Send2Log "SetAccessRestrictions: Error in download --> $(IndentList "$ac_jobs")" 1 "${0##$d_baseDir/} :  SetAccessRestrictions : Line Number-${LINENO}"
+		Send2Log "SetAccessRestrictions: Error in download --> $(IndentList "$ac_jobs")" 1 "${0##$d_baseDir/} :  SetAccessRestrictions : Line Number ${LINENO}"
 	else
 		echo -e "$otherjobs\n$ac_jobs" > "$cronJobsFile"
-		Send2Log "SetAccessRestrictions: adding access rules to \`$cronJobsFile\` --> $(IndentList "$ac_jobs")" 1 "${0##$d_baseDir/} : SetAccessRestrictions : Line Number-${LINENO}"
+		Send2Log "SetAccessRestrictions: adding access rules to \`$cronJobsFile\` --> $(IndentList "$ac_jobs")" 1 "${0##$d_baseDir/} : SetAccessRestrictions : Line Number ${LINENO}"
 	fi
 	
 	IFS=$'\n'
@@ -231,16 +231,15 @@ SetAccessRestrictions(){
 		local jtime=$(echo "$job" | awk '{ print $2":"$1 }')
 		local jday=$(echo "$job" | awk '{print $5}')
 		local jmonth=$(echo "$job" | awk '{print $4}')
-		Send2Log "SetAccessRestrictions: jtime=$jtime / _ts=$_ts ($jday - $jmonth)" 0 "${0##$d_baseDir/} :  SetAccessRestrictions : Line Number-${LINENO}"
+		Send2Log "SetAccessRestrictions: jtime=$jtime / _ts=$_ts ($jday - $jmonth)" 0 "${0##$d_baseDir/} :  SetAccessRestrictions : Line Number ${LINENO}"
 		if [ "$jmonth" == '*' ] || [ -n "$(echo "$jmonth" | grep -e "\b$cm\b")" ] ; then
 			if [ "$jday" == '*' ] || [ -n "$(echo "$jday" | grep -e "\b$cd\b")" ] ; then
 				if [ "$_ts" \> "$jtime" ] ; then
 					local actualJob="${d_baseDir}/block.sh$(echo "$job" | awk '{$1=$2=$3=$4=$5=$6=""; print $0 }' | tr -s ' ')"
-					Send2Log "SetAccessRestrictions: need to run ${actualJob## }" 1 "${0##$d_baseDir/} : SetAccessRestrictions : Line Number-${LINENO}"
+					Send2Log "SetAccessRestrictions: need to run ${actualJob## }" 1 "${0##$d_baseDir/} : SetAccessRestrictions : Line Number ${LINENO}"
 					eval "${d_baseDir}/block.sh$(echo "$job" | awk '{$1=$2=$3=$4=$5=$6=""; print $0 }' | tr -s ' ')"
 				fi
 			fi
 		fi
 	done
 }
-# set +v +x

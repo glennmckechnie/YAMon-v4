@@ -30,4 +30,4 @@ Send2Log "getACRules: " 2
 
 ResetCron
 
-LogEndOfFunction
+FunctionUsage "Finished" 1 "${0##$d_baseDir/} : Main - end : Line Number ${LINENO}"

@@ -6,6 +6,31 @@
 # Summary of changes in YAMon
 
 * History
+  > 2026-06-18: 4.0.8
+	+ backupYAMon4.sh - tweaks, pass option to enable unpacking process.
+	+ add logging to check-network.sh, calculate-daily-totals.sh, end-of-day.sh, end-of-hour.sh,
+	    in-unlimited.sh, setupIPChains.sh, shared.sh, new-billing-interval.sh, start.sh,
+	    update-live-data.sh,
+	+ end-of-day.sh -  Fix subtle bug in GetField that broke sed statements.
+	    Recode to add updated timestamps string, switch between active '0' and '1' fixed.
+	    Also delete entries older than (default) 30 days, set in config.file
+	    _usebydate='30' # Check age of user.js entries, delete after 30 days (the default value)
+	+ setup4.0.8.sh: Add statement to set _usebydate='30' option. Add NB re fixes.sh. Auto start
+	     YAMon on completion - don't ask - just do
+	+ shared.sh Rework ChangePath to add an "updated" tag.
+	    Add CalcReportSpan() for logging and debug purposes.
+	    LogEndOfFunction() becomes FunctionUsage()
+	    Rework AddEntry()
+	    GetField() move || statements to {sub ; shell} - subtle bug polluting return value.
+	+ new-day.sh: Bug fix:- Add missing _liveArchiveFilePath update line.
+	+ traffic ov test :  group statements for completeness.
+	+ new-day.sh: rework header (old / new code)
+	+ new-hour.sh: refine //Hour header - debugging / timing / issues
+	+ update-live-data.sh, update-reports, traffic.sh : rework logging time spans - use CalcReportSpan()
+	+ Add yamon4.0.7.html and yamon4.0.8.html as index.html alternatives.
+	+ add local jQuery libraries - maybe selected manually.
+	+ symlink creation - YAFix -n and %/ to ensure no recursive symlinks! This time Gadget!
+
   > 2026-06-09: 4.0.8
 	+ Revisit the local / remote file code because it basically wasn't working - limping along would be the
 	    kindest description.

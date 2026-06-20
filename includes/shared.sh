@@ -8,6 +8,10 @@
 # various utility functions (shared between one or more scripts)
 #
 # History
+#
+# 2026-06-13: Rework ChangePath to add an "updated" tag. new-day.sh
+#       FIXME fails to update it's paths why?
+#             Add CalcReportSpan() for logging and debug purposes.
 # 2026-06-09: Add debug switch to quieten pop-up output (Send2Log)
 #	Also debug iinformation for logs pop-up on date field
 #	Usage: Send2Log "message" "log level" "line number"
@@ -18,10 +22,10 @@
 # 2026-05-22: 4.0.8 - add copy routine to preserve data files
 # 2025-02-26: refine,fix typo in var length test.
 # 2020-03-19: 4.0.7 - added static leases for Tomato (thx tvlz)
-#                   - added wait option ( -w -W1) to commands that add entries in iptables
-#                   - then added _iptablesWait 'cause not all firmware variants support iptables -w...
-#                   - combined StaticLeases_Merlin & StaticLeases_Tomato into StaticLeases_Merlin_Tomato
-#                   - added GetMACbyIP & GetDeviceGroup (from traffic & check-network)
+#	- added wait option ( -w -W1) to commands that add entries in iptables
+#	- then added _iptablesWait 'cause not all firmware variants support iptables -w...
+#	- combined StaticLeases_Merlin & StaticLeases_Tomato into StaticLeases_Merlin_Tomato
+#	- added GetMACbyIP & GetDeviceGroup (from traffic & check-network)
 # 2020-01-03: 4.0.6 - no changes
 # 2019-12-23: 4.0.5 - changed loglevel of start messages in logs
 # 2019-11-24: 4.0.4 - no changes (yet)
@@ -31,7 +35,7 @@
 
 # debug: for development
 debug='yes' # Send2Log, include supplied LINENO debug info
-#debug=''    # Send2Log, skip LINENO debug info
+#debug='' # Send2Log, skip LINENO debug info
 
 _ds=$(date +"%Y-%m-%d")
 _ts=$(date +"%T")
@@ -88,35 +92,65 @@ NoRenice(){
 $_setRenice
 
 LogStartOfFunction(){
+# unused
 	Send2Log "${0##$d_baseDir/} - $1" "$2" "$3"
 }
 
-LogEndOfFunction(){
-	Send2Log "${0##$d_baseDir/} - $1" "$2" "$3"
+FunctionUsage(){
+	#Send2Log "${0##$d_baseDir/} - $1" "$2" "$3"
+	# temporary override
+	Send2Log "${0##$d_baseDir/} - $1" "3" "$3"
+}
+
+CalcReportSpan(){
+        local t_realhr t_realmin t_realsec t_dechr t_decmin t_interval t_delta t_carry t_strthr t_strtmin t_stamp
+	t_realhr=$(echo "$_ts" | cut -d':' -f1)
+	t_realmin=$(echo "$_ts" | cut -d':' -f2)
+	t_realsec=$(echo "$_ts" | cut -d':' -f3)
+
+	# improved diff calculation (cosmetic)
+	t_dechr=${t_realhr#0}; t_decmin=${t_realmin#0} # octal (padded0) to decimal !
+	t_delta=$(( ${t_decmin#0} - ${1}))
+	t_strtmin=$(( (t_delta % 60 + 60) % 60 ))
+	t_carry=$(( (t_delta - t_strtmin) / 60 ))   # negative or zero
+	#t_delta=$(printf '%02d' "$t_delta")
+	t_strthr=$((${t_dechr} + t_carry))
+	if [ $t_strthr -lt '0' ] ;  then t_strthr='23' ; fi # adjust for hour rollback
+	t_strtmin=$(printf '%02d' "${t_strtmin:-0}")
+
+	echo "$t_strthr:$t_strtmin:$t_realsec -> $t_realhr:$t_realmin:$t_realsec"
+	#t_reportSpan="$t_strthr:$t_strtmin -> $t_realhr:$t_realmin"
+	#echo "${t_reportSpan}"
 }
 
 AddEntry(){
-	local param="${1//./_}"
-	local value="$2"
-	local pathsFile="${3:-${d_baseDir}/includes/paths.sh}"
-	local existingValue=$(cat "$pathsFile" | grep "$param=.\{0,\}$")
+	local l_param l_value l_pathsFile l_strUpdated l_escValue l_line
+	l_param="${1//./_}" # when do we pass dotted l_params?
+	l_value="$2"
+	l_pathsFile="${3:-${d_baseDir}/includes/paths.sh}"
+	l_strUpdated="$4" # only when called via ChangePath()
 
-	if [ -z "$existingValue" ] ; then
-		Send2Log "AddEntry: adding value --> \`$param\`='$value' in $pathsFile " 1  "${0##$d_baseDir/} : AddEntry: Line Number ${LINENO}"
-		echo $param=\'$value\' >> "${d_baseDir}/includes/paths.sh"
+	# escape single quotes for embedding inside single quotes: ' -> '\''
+	l_escValue=$(printf "%s" "$l_value" | sed "s/'/'\\\\''/g")
+	l_line="${l_param}='${l_escValue}'"
+	[ -n "$l_strUpdated" ] && l_line="$l_line $l_strUpdated"
+	if grep -q -E "^[[:space:]]*${l_param}[[:space:]]*=" "$l_pathsFile"; then
+		sed -i "s~^[[:space:]]*${l_param}[[:space:]]*=.*~${l_line}~" "$l_pathsFile"
+		Send2Log "Updated paths.sh with $l_line" 2 "${0##$d_baseDir/} : AddEntry : Line Number ${LINENO}"
 	else
-		Send2Log "ChangePath: changing value of \`$param\` to $value (prior $existingValue) in $pathsFile" 1 "${0##$d_baseDir/} : AddEntry: Line Number ${LINENO}"
-		sed -i "s~^$existingValue~$param='$value'~" "$pathsFile"
+		printf '%s\n' "$l_line" >> "$l_pathsFile"
+		Send2Log "Added new entry to paths.sh -> $l_line" 2 "${0##$d_baseDir/} : AddEntry : Line Number ${LINENO}"
 	fi
 }
+
 ChangePath(){
-	# changes a value in the user generated includes/paths.sh
-	AddEntry "$1" "$2" "$3"
+	# changes a value in the user generated includes/paths.sh, adds an updated tag.
+	AddEntry "$1" "$2" "$3" "        # re-generated $_ds $_ts"
 }
 CheckGroupChain(){
-	Send2Log "CheckGroupChain: $1 /  $2 " 0 "${0##$d_baseDir/} : CheckGroupChain: Line Number ${LINENO}"
-	local cmd=$1
-	local groupName=${2:-Unknown}
+	Send2Log "CheckGroupChain: $1 / $2 " 0 "${0##$d_baseDir/} : CheckGroupChain: Line Number ${LINENO}"
+	local cmd="$1"
+	local groupName="${2:-Unknown}"
 	local groupChain="${YAMON_IPTABLES}_$(echo $groupName | sed "s~[^a-z0-9]~~ig")"
 	if [ -z "$($cmd -L | grep '^Chain' | grep "$groupChain\b")" ] ; then
 		Send2Log "CheckGroupChain: Adding group chain to iptables: $groupChain " 2 "${0##$d_baseDir/} : CheckGroupChain: Line Number ${LINENO}"
@@ -131,10 +165,10 @@ GetMACbyIP(){
 
 	local mip=$(cat /proc/net/arp | grep "$tip" | awk '{print $4}')
 	if [ -n "$mip" ] ; then
-		echo "$mip" 
+		echo "$mip"
 		return
 	fi
-	
+
 	# then check users.js
 	local dd=$(echo "$_currentUsers" | grep -e "^mac2ip({.*})$" | grep "$tip")
 	if [ -z "$dd" ] ; then
@@ -142,7 +176,7 @@ GetMACbyIP(){
 	else
 		local id=$(GetField "$dd" 'id')
 		local mac=$(echo "$id"| cut -d- -f1)
-		Send2Log "GetMACbyIP - $ip --> $id  --> $mac" 0 "${0##$d_baseDir/} : GetMACbyIP: Line Number ${LINENO}"
+		Send2Log "GetMACbyIP - $ip --> $id --> $mac" 0 "${0##$d_baseDir/} : GetMACbyIP: Line Number ${LINENO}"
 		[ -n "$mac" ] && echo "$mac"
 	fi
 }
@@ -156,21 +190,21 @@ GetDeviceGroup(){
 		return
 	fi
 	local group=$(GetField "$dd" 'group')
-		
+
 	Send2Log "GetDeviceGroup - $1 / $2 --> $dd --> $group" 0 "${0##$d_baseDir/} : GetDeviceGroup: Line Number ${LINENO}"
-	echo "$group"	
+	echo "$group"
 }
- 
+
 CheckIPTableEntry(){
 
-	Send2Log "CheckIPTableEntry: $1 /  $2 " 0 "${0##$d_baseDir/} : CheckIPTableEntry: Line Number ${LINENO}"
-	
+	Send2Log "CheckIPTableEntry: $1 / $2 " 0 "${0##$d_baseDir/} : CheckIPTableEntry: Line Number ${LINENO}"
+
 	local ip=$1
 	local groupName=${2:-Unknown}
 	local chain="$YAMON_IPTABLES"
 	Send2Log "CheckIPTableEntry: ip=$ip / cmd=$cmd / chain=$YAMON_IPTABLES " 0 "${0##$d_baseDir/} : CheckIPTableEntry: Line Number ${LINENO}"
-	
-	re_ip4="([0-9]{1,3}\.){3}[0-9]{1,3}"	
+
+	re_ip4="([0-9]{1,3}\.){3}[0-9]{1,3}"
 	#if [ -n "$(echo $ip | egrep "$re_ip4")" ] ; then # simplistically matches IPv4
 	if [ -n "$(echo $ip | grep -E "$re_ip4")" ] ; then # simplistically matches IPv4
 		local cmd='iptables'
@@ -181,7 +215,7 @@ CheckIPTableEntry(){
 		local g_ip='::/0'
 	fi
 	Send2Log "CheckIPTableEntry: checking $cmd for $ip" 0 "${0##$d_baseDir/} : CheckIPTableEntry: Line Number ${LINENO}"
-	
+
 	ClearDuplicateRules(){
 		local n=1
 		while [ true ]; do
@@ -192,7 +226,7 @@ CheckIPTableEntry(){
 			n=$(( $n + 1 ))
 		done
 		Send2Log "ClearDuplicateRules: removed $n duplicate entries for $ip" 0 "${0##$d_baseDir/} : ClearDuplicateRules : Line Number ${LINENO}"
-	} 
+	}
 	AddIP(){
 		local groupChain="${YAMON_IPTABLES}_$(echo $groupName | sed "s~[^a-z0-9]~~ig")"
 		Send2Log "AddIP: $cmd $YAMON_IPTABLES $ip --> $groupChain (firmware: $_firmware)" 0 "${0##$d_baseDir/} : AddIP : Line Number ${LINENO}"
@@ -207,18 +241,18 @@ CheckIPTableEntry(){
 			Send2Log "AddIP: $cmd -I "$YAMON_IPTABLES" -g "$groupChain" -s $ip" 0 "${0##$d_baseDir/} : AddIP : Line Number ${LINENO}"
 		fi
 	}
-	
+
 	[ "$ip" == "$g_ip" ] && return
 	local tip="\b${ip//\./\\.}\b"
 	local nm=$($cmd -L "$YAMON_IPTABLES" -n | grep -ic "$tip")
-		
-	if [ "$nm" -eq "2" ] || [ "$nm" -eq "4" ] ; then  #correct number of entries
+
+	if [ "$nm" -eq "2" ] || [ "$nm" -eq "4" ] ; then #correct number of entries
 		Send2Log "CheckIPTableEntry: $nm matches for $ip in $cmd / $YAMON_IPTABLES" 0 "${0##$d_baseDir/} : CheckIPTableEntry: Line Number ${LINENO}"
 		return
 	fi
-	
+
 	CheckGroupChain $cmd $groupName
-	
+
 	if [ "$nm" -eq "0" ]; then
 		Send2Log "CheckIPTableEntry: no match for $ip in $cmd / $YAMON_IPTABLES" 0 "${0##$d_baseDir/} : CheckIPTableEntry: Line Number ${LINENO}"
 	else
@@ -232,20 +266,23 @@ UpdateLastSeen(){
 	local tls="$2"
 
 	local lsd="$_ds $tls"
-	Send2Log "UpdateLastSeen:  Updating last seen for '$id' to '$lsd'" 0 "${0##$d_baseDir/} : UpdateLastSeen : Line Number ${LINENO}"
+	Send2Log "UpdateLastSeen: Updating last seen for '$id' to '$lsd'" 0 "${0##$d_baseDir/} : UpdateLastSeen : Line Number ${LINENO}"
 	echo -e "lastseen({ \"id\":\"$id\", \"last-seen\":\"$lsd\" })\n$(cat "$tmpLastSeen" | grep -e "^lastseen({.*})$" | grep -v "$id")" > "$tmpLastSeen"
 }
-GetField()
-{	#returns just the first match... duplicates are ignored
+GetField(){
+	#returns just the first match... duplicates are ignored
 	local result=$(echo "$1" | grep -io -m1 "$2\":\"[^\"]\{1,\}" | cut -d\" -f3)
 	echo "$result"
-	[ -n "$result" ] && Send2Log "GetField: $2='$result' in \`$1\`" 0 "${0##$d_baseDir/} : GetField : Line Number ${LINENO}" && return
-	[ -z "$result" ] && [ -z "$1" ] && Send2Log "GetField: field '$2' not found because the search string was empty (\`$1\`)" 1 "${0##$d_baseDir/} : GetField: Line Number ${LINENO}" && return
-	[ -z "$result" ] && Send2Log "GetField: field '$2' not found in \`$1\`" 1 "${0##$d_baseDir/} : GetField : Line Number ${LINENO}"
+	# use a subshell for isolation.
+	[ -n "$result" ] && { Send2Log "GetField: $2='$result' in \`$1\`" 0 "${0##$d_baseDir/} : GetField : Line Number ${LINENO}"; return; }
+	[ -z "$result" ] && [ -z "$1" ] && { \
+	Send2Log "GetField: field '$2' not found because the search string was empty (\`$1\`)" 1 "${0##$d_baseDir/} : GetField: Line Number ${LINENO}"; \
+	return; }
+	[ -z "$result" ] && { Send2Log "GetField: field '$2' not found in \`$1\`" 1 "${0##$d_baseDir/} : GetField : Line Number ${LINENO}"; }
 }
 UsersJSUpdated(){
-	Send2Log "UsersJSUpdated: users_updated changed to '$_ds $_ts'" 2 "${0##$d_baseDir/} : UsersJSUpdated : Line Number ${LINENO}"
 	sed -i "s~users_updated=\"[^\"]\{0,\}\"~users_updated=\"$_ds $_ts\"~" "$_usersFile"
+	Send2Log "UsersJSUpdated: users_updated changed to '$_ds $_ts'" 2 "${0##$d_baseDir/} : UsersJSUpdated : Line Number ${LINENO}"
 }
 UpdateField(){
 	local cl="$1" #current line of text
@@ -315,44 +352,44 @@ GetDeviceName(){
 		Send2Log "StaticLeases_Merlin_Tomato: result=$result " 0 "${0##$d_baseDir/} : StaticLeases_Merlin_Tomato : Line Number ${LINENO}"
 		echo "$result"
 	}
-	
+
 	Send2Log "GetDeviceName: $1 $2" 0 "${0##$d_baseDir/} : GetDeviceName : Line Number ${LINENO}"
 	#check first in static leases
 	local dn=`$nameFromStaticLeases "$mac"`
 	if [ -n "${dn/$/}" ] ; then
 		Send2Log "GetDeviceName: found device name $dn for $mac in static leases ($nameFromStaticLeases)" 0 "${0##$d_baseDir/} : GetDeviceName : Line Number ${LINENO}"
-		echo "$dn" 
+		echo "$dn"
 		return
 	fi
 	Send2Log "GetDeviceName: No device name for $mac in static leases ($nameFromStaticLeases)" 0 "${0##$d_baseDir/} : GetDeviceName : Line Number ${LINENO}"
-	
+
 	#then in DNSMasqConf
 	dn=`$nameFromDNSMasqConf "$mac"`
 	if [ -n "${dn/$/}" ] ; then
-		Send2Log "GetDeviceName: found device name $dn for $mac in $_dnsmasq_conf" 0  "${0##$d_baseDir/} : GetDeviceName : Line Number ${LINENO}"
-		echo "$dn" 
+		Send2Log "GetDeviceName: found device name $dn for $mac in $_dnsmasq_conf" 0 "${0##$d_baseDir/} : GetDeviceName : Line Number ${LINENO}"
+		echo "$dn"
 		return
 	fi
 	Send2Log "GetDeviceName: No device name for $mac in in $_dnsmasq_conf ($nameFromDNSMasqConf)" 0 "${0##$d_baseDir/} : GetDeviceName : Line Number ${LINENO}"
-	
+
 	#finally in DNSMasqLease
 	dn=`$nameFromDNSMasqLease "$mac"`
 	if [ -n "${dn/$/}" ] ; then
-		Send2Log "GetDeviceName: found device name $dn for $mac in $_dnsmasq_leases" 0  "${0##$d_baseDir/} : GetDeviceName : Line Number ${LINENO}"
-		echo "$dn" 
+		Send2Log "GetDeviceName: found device name $dn for $mac in $_dnsmasq_leases" 0 "${0##$d_baseDir/} : GetDeviceName : Line Number ${LINENO}"
+		echo "$dn"
 		return
 	fi
 	Send2Log "GetDeviceName: No device name for $mac in in $_dnsmasq_leases ($nameFromDNSMasqLease)" 0 "${0##$d_baseDir/} : GetDeviceName : Line Number ${LINENO}"
-	
+
 	#Dang... no matches
 	local big=$(cat "$_usersFile" | grep -e "^mac2ip({.*})$" | grep -o "\"$_defaultDeviceName-[^\"]\{0,\}\"" | sort | tail -1 | tr -d '"' | cut -d- -f2)
 	local nextnum=$(printf %02d $(( $(echo "${big#0} ")+ 1 )))
 	echo "$_defaultDeviceName-$nextnum"
-	Send2Log "GetDeviceName: did not find name for  $mac... defaulting to $_defaultDeviceName-$nextnum" 0 "${0##$d_baseDir/} : GetDeviceName : Line Number ${LINENO}"
+	Send2Log "GetDeviceName: did not find name for $mac... defaulting to $_defaultDeviceName-$nextnum" 0 "${0##$d_baseDir/} : GetDeviceName : Line Number ${LINENO}"
 }
 
 CheckMAC2GroupinUserJS(){
-	Send2Log "CheckMAC2GroupinUserJS:  $1 $2" 2 "${0##$d_baseDir/} : ChangeMACGroupinUserJS : Line Number ${LINENO}"
+	Send2Log "CheckMAC2GroupinUserJS: $1 $2" 2 "${0##$d_baseDir/} : ChangeMACGroupinUserJS : Line Number ${LINENO}"
 	local m=$1
 	local gn=${2:-${_defaultGroup:-${_defaultOwner:-Unknown}}}
 
@@ -372,7 +409,7 @@ CheckMAC2GroupinUserJS(){
 			local mm=$(echo "$id" | cut -d'-' -f1)
 			local ii=$(echo "$id" | cut -d'-' -f2)
 
-			re_ip4="([0-9]{1,3}\.){3}[0-9]{1,3}"	
+			re_ip4="([0-9]{1,3}\.){3}[0-9]{1,3}"
 			if [ -n "$(echo $ip | grep -E "$re_ip4")" ] ; then # simplistically matches IPv4
 				local cmd='iptables'
 			else
@@ -390,7 +427,7 @@ CheckMAC2GroupinUserJS(){
 		done
 		UsersJSUpdated
 	}
-	
+
 	AddNewMACGroup(){
 		Send2Log "AddNewMACGroup: adding mac2group entry for $m & $gn" 2 "${0##$d_baseDir/} : AddNewMACGroup : Line Number ${LINENO}"
 		local newentry="mac2group({ \"mac\":\"$m\", \"group\":\"$gn\" })"
@@ -399,7 +436,7 @@ CheckMAC2GroupinUserJS(){
 	}
 
 	local matchesMACGroup=$(cat "$_usersFile" | grep -e "^mac2group({.*})$" | grep "\"mac\":\"$m\"")
-	
+
 	if [ -z "$matchesMACGroup" ] ; then
 		AddNewMACGroup
 	elif [ "$(echo $matchesMACGroup | wc -l)" -eq 1 ] ; then
@@ -411,12 +448,12 @@ CheckMAC2GroupinUserJS(){
 	fi
 }
 CheckMAC2IPinUserJS(){
-	Send2Log "CheckMAC2IPinUserJS:  $1 $2" 0 "${0##$d_baseDir/} :CheckMAC2IPinUserJS : Line Number ${LINENO}"
+	Send2Log "CheckMAC2IPinUserJS: $1 $2" 0 "${0##$d_baseDir/} :CheckMAC2IPinUserJS : Line Number ${LINENO}"
 	local m=$1
 	local i=$2
 	local dn=$3
 	DeactivatebyIP(){
-		Send2Log "DeactivatebyIP:  $i" 0 "${0##$d_baseDir/} :CheckMAC2IPinUserJS : Line Number ${LINENO}"
+		Send2Log "DeactivatebyIP: $i" 0 "${0##$d_baseDir/} :CheckMAC2IPinUserJS : Line Number ${LINENO}"
 		local otherswithIP=$(cat "$_usersFile" | grep -e "^mac2ip({.*})$" | grep "\b${i//\./\\.}\b" | grep "\"active\":\"1\"")
 		if [ -z "$otherswithIP" ] ; then
 			Send2Log "DeactivatebyIP: no active duplicates of $i in $_usersFile" 0 "${0##$d_baseDir/} :CheckMAC2IPinUserJS : Line Number ${LINENO}"
@@ -450,12 +487,12 @@ CheckMAC2IPinUserJS(){
 			Send2Log "Otherwise..." 0 "${0##$d_baseDir/} : AddNewMACIP: Line Number ${LINENO}"
 		fi
 		local newentry="mac2ip({ \"id\":\"$m-$i\", \"name\":\"${dn:-New Device}\", \"active\":\"1\", \"added\":\"${_ds} ${_ts}\", \"updated\":\"\" })"
-		Send2Log "AddNewMACIP: adding $newentry to $_usersFile" 0 "${0##$d_baseDir/} : AddNewMACIP :  Line Number ${LINENO}"
+		Send2Log "AddNewMACIP: adding $newentry to $_usersFile" 0 "${0##$d_baseDir/} : AddNewMACIP : Line Number ${LINENO}"
 		sed -i "s~//MAC -> IP~//MAC -> IP\n$newentry~g" "$_usersFile"
 		UpdateLastSeen "$m-$i" "$(date +"%T")"
 		UsersJSUpdated
 	}
-	
+
 	local matchesMACIP=$(cat "$_usersFile" | grep -e "^mac2ip({.*})$" | grep "\"id\":\"$m-$i\"")
 	if [ -z "$matchesMACIP" ] ; then
 		AddNewMACIP
@@ -475,7 +512,7 @@ AddActiveDevices(){
 	local currentMacIP=$(cat "$macIPFile")
 	local adl=$(echo "$_currentUsers" | grep '"active":"1"')
 	IFS=$'\n'
-	for device in $_ActiveIPs 
+	for device in $_ActiveIPs
 	do
 		local id=$(GetField $device 'id')
 		local ip=$(echo "$id" | cut -d'-' -f2)
@@ -483,7 +520,7 @@ AddActiveDevices(){
 		[ "$_generic_ipv4" == "$ip" ] || [ "$_generic_ipv6" == "$ip" ] && continue
 		local mac=$(echo "$id" | cut -d'-' -f1)
 		local group=$(GetField "$(echo "$_MACGroups" | grep "$mac")" 'group')
-		
+
 		Send2Log "AddActiveDevices --> $id / $mac / $ip / ${group:-Unknown} " 0 "${0##$d_baseDir/} : AddActiveDevices: Line Number ${LINENO}"
 		if [ -z "$(echo "$currentMacIP" | grep "${ip//\./\\.}" )" ] ; then
 			Send2Log "AddActiveDevices --> IP $ip does not exist in $macIPFile... added to the list" 0 "${0##$d_baseDir/} : AddActiveDevices: Line Number ${LINENO}"
@@ -493,26 +530,26 @@ AddActiveDevices(){
 		fi
 		Send2Log "AddActiveDevices --> $id added to $macIPFile" 1 "${0##$d_baseDir/} : AddActiveDevices : Line Number ${LINENO}"
 		echo "$mac $ip" >> "$macIPFile"
-	
+
 		CheckIPTableEntry "$ip" "${group:-Unknown}"
 	done
 	Send2Log "AddActiveDevices: macipList --> $(IndentList "$(cat "$macIPFile")")" 0 "${0##$d_baseDir/} : AddActiveDevices: Line Number ${LINENO}"
 }
 
-DigitAdd()
-{
-	local n1=${1:-0}
-	local n2=${2:-0}
-	local max_digits=${_max_digits:-12}
+DigitAdd(){
+	local n1 n2 max_digits l1 l2 carry total d1 d2 s sum
+	n1=${1:-0}
+	n2=${2:-0}
+	max_digits=${_max_digits:-12}
 	if [ "${#n1}" -lt "$max_digits" ] && [ "${#n2}" -lt "$max_digits" ] ; then
 		echo $(($n1+$n2))
-		Send2Log "DigitAdd: $1 + $2 = $total" 0 "${0##$d_baseDir/} : DigitAdd: Line Number ${LINENO}"
+		# Send2Log "DigitAdd: $1 + $2 = $total" 0 "${0##$d_baseDir/} : DigitAdd: Line Number ${LINENO}"
 		return
 	fi
-	local l1=${#n1}
-	local l2=${#n2}
-	local carry=0
-	local total=''
+	l1=${#n1}
+	l2=${#n2}
+	carry=0
+	total=''
 	while [ "$l1" -gt "0" ] || [ "$l2" -gt "0" ]; do
 		d1=0
 		d2=0
@@ -535,9 +572,9 @@ CheckIntervalFiles(){
 
 	if [ ! -d "$_path2CurrentMonth" ] ; then
 		mkdir -p "$_path2CurrentMonth"
-		Send2Log "CheckIntervalFiles: create directory: $_path2CurrentMonth" 1 "${0##$d_baseDir/} :  CheckIntervalFiles: Line Number ${LINENO}"
+		Send2Log "CheckIntervalFiles: create directory: $_path2CurrentMonth" 1 "${0##$d_baseDir/} : CheckIntervalFiles: Line Number ${LINENO}"
 	fi
-	Send2Log "CheckIntervalFiles: create interval file: $_intervalDataFile" 1 "${0##$d_baseDir/} :  CheckIntervalFiles: Line Number ${LINENO}"
+	Send2Log "CheckIntervalFiles: create interval file: $_intervalDataFile" 1 "${0##$d_baseDir/} : CheckIntervalFiles: Line Number ${LINENO}"
 	echo "var monthly_created=\"${_ds} ${_ts}\"
 	var monthly_updated=\"${_ds} ${_ts}\"
 	var monthlyDataCap=\"$_monthlyDataCap\"
@@ -556,8 +593,8 @@ HtmlHeader(){
 	# new-day.sh
 	# HtmlHeader "" "$_ds" "$g_daily_log_file"
 	# moved from new-day.sh & end-of-hour.sh
-	local l_header="$1" l_ds="$2" l_html_file="$3"  l_thr="$4"
-	Send2Log "HtmlHeader: header? ${l_header} : l_ds ${l_ds}  : l_html_file ${l_html_file}  : l_thr ${l_thr} " 4 "${0##$d_baseDir/} : HTMLHeader : Line Number ${LINENO}"
+	local l_header="$1" l_ds="$2" l_html_file="$3" l_thr="$4"
+	Send2Log "HtmlHeader: header? ${l_header} : l_ds ${l_ds} : l_html_file ${l_html_file} : l_thr ${l_thr} " 4 "${0##$d_baseDir/} : HTMLHeader : Line Number ${LINENO}"
 # As if we need any more wordage! # <label><input class='filter' type='checkbox' name='no-ll5' checked>Level 5<span class='tooltip tooltip-ll5'>Level 5: Debugging Info.</span></label> ${l_header}
 
 echo "<!DOCTYPE html><html lang='en'>
@@ -583,7 +620,7 @@ echo "<!DOCTYPE html><html lang='en'>
 <label><input class='filter' type='checkbox' name='no-ll0'>Level 0<span class='tooltip tooltip-ll0'>This option shows Level 0 logs.</span></label></p> ${l_header}
 " > "$l_html_file"
 
-if  [ -n "${l_header}" ] ; then
+if [ -n "${l_header}" ] ; then
 	echo "</div> $l_header
 <div class='hour-contents'><p>Hour: $l_thr</p> " >> "$l_html_file"
 else

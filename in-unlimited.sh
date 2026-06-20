@@ -19,13 +19,13 @@
 
 d_baseDir=$(cd "$(dirname "$0")" && pwd)
 source "${d_baseDir}/includes/shared.sh"
-Send2Log "in-unlimited: $1" 1
+Send2Log "in-unlimited: $1" 1 "${0##$d_baseDir/} : Main - end : Line Number ${LINENO}"
 if [ "$1" == "start" ] ; then
 	ChangePath 'currentlyUnlimited' "1"
 elif [ "$1" == "end" ] ; then
 	ChangePath 'currentlyUnlimited' "0"
 else
-	Send2Log "in-unlimited: bad parameter -->$1" 1
+	Send2Log "in-unlimited: bad parameter -->$1" 1 "${0##$d_baseDir/} : Main - end : Line Number ${LINENO}"
 fi
 
-LogEndOfFunction
+FunctionUsagei "Finished" 2 "${0##$d_baseDir/} : Main - end : Line Number ${LINENO}"

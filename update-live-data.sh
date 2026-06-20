@@ -23,7 +23,10 @@ d_baseDir=$(cd "$(dirname "$0")" && pwd)
 source "${d_baseDir}/includes/shared.sh"
 source "${d_baseDir}/includes/traffic.sh"
 
-Send2Log "Running update-live-data" 0 "${0##$d_baseDir/} : Start : Line Number ${LINENO}"
+t_reportSpan=$(CalcReportSpan '1')
+
+Send2Log "Running update-live-data: --> ${t_reportSpan}" 1 "${0##$d_baseDir/} : Start : Line Number ${LINENO}"
+echo "Running update-live-data: --> ${t_reportSpan} 1 ${0##$d_baseDir/} : Start : Line Number ${LINENO}" >> '/opt/YAMon4/testCounter.debug'
 
 CurrentConnections_0()
 { #_doCurrConnections=0 --> do nothing, the option is disabled
@@ -39,7 +42,7 @@ CurrentConnections_1()
 		echo ''
 	}
 
-	Send2Log "Running CurrentConnections_1 --> $_liveFilePath"  0 "${0##$d_baseDir/} : CurrentConnections_1 : Line Number ${LINENO}"
+	Send2Log "Running CurrentConnections_1 --> $_liveFilePath" 0 "${0##$d_baseDir/} : CurrentConnections_1 : Line Number ${LINENO}"
 
 	ArchiveLiveUpdates_0()
 	{ #_doArchiveLiveUpdates=0 --> do nothing, the option is disabled
@@ -54,7 +57,7 @@ CurrentConnections_1()
 		dpct=$(df -P "$d_baseDir" 2>/dev/null | awk 'NR==2{print $5}')
 		if printf '%s' "$dpct" | grep -qE '^[0-9]+%$'; then
 		  dspace=$(printf '%02d' "${dpct%\%}")
-		  #Send2Log "ArchiveLiveUpdates : BUGFIX : ${dpct} becomes ${dspace} available" 4 "${0##$d_baseDir/} : ArchiveLiveUpdates_1 : Line Number ${LINENO}"
+		  Send2Log "ArchiveLiveUpdates :  ${dpct} becomes ${dspace} available" 0 "${0##$d_baseDir/} : ArchiveLiveUpdates_1 : Line Number ${LINENO}"
 		else
 		  # NaN or ?? - pass a safe default
 		  dspace='99'
@@ -68,9 +71,9 @@ CurrentConnections_1()
 		# fi
 		if [ "$dspace" -lt '90' ] ; then
 			cat "$_liveFilePath" >> "$_liveArchiveFilePath"
-			Send2Log "ArchiveLiveUpdates : cat $_liveFilePath >> $_liveArchiveFilePath" 3 "${0##$d_baseDir/} : ArchiveLiveUpdates_1 : Line Number ${LINENO}"
+			# Send2Log "ArchiveLiveUpdates : cat $_liveFilePath >> $_liveArchiveFilePath" 3 "${0##$d_baseDir/} : ArchiveLiveUpdates_1 : Line Number ${LINENO}"
 		else
-			Send2Log "ArchiveLiveUpdates_: skipped because of low / unknown disk space: $dpct" 2 "${0##$d_baseDir/} : ArchiveLiveUpdates_1 : Line Number ${LINENO}"
+			Send2Log "ArchiveLiveUpdates_: skipped because of low / unknown disk space: $dpct" 4 "${0##$d_baseDir/} : ArchiveLiveUpdates_1 : Line Number ${LINENO}"
 		fi
 	}
 	
@@ -105,14 +108,15 @@ CurrentConnections_1()
 	done
 	
 	local ddd=$(awk "$_conntrack_awk" "$_conntrack")
+	ddd_snip=$(printf '%s' "${ddd:0:100}")
 	echo -e "\n/*current connections by ip:*/" >> $_liveFilePath
 	local err=$(echo "${ddd%,}]" 2>&1 1>> $_liveFilePath)
-	#Send2Log "curr_connections >>>\n$ddd" 0 "${0##$d_baseDir/} : CurrentConnections_1 : Line Number ${LINENO}"
-	[ -n "$err" ] && Send2Log "ERROR >>> doliveUpdates:  $(IndentList "$err")" 3 "${0##$d_baseDir/} : CurrentConnections_1 : Line Number ${LINENO}"
-	#FIXME old debug code??? sh hates it, bash ignores it!
-	# sh: invalid number ''
+	# verbose output# Send2Log "curr_connections >>> $(IndentList "$ddd")" 0 "${0##$d_baseDir/} : CurrentConnections_1 : Line Number ${LINENO}"
+	Send2Log "curr_connections >>> $(IndentList "$ddd_snip") [..8<..] " 0 "${0##$d_baseDir/} : CurrentConnections_1 : Line Number ${LINENO}"
+	[ -n "$err" ] && Send2Log "ERROR >>> doliveUpdates:  $(IndentList "$err")" 4 "${0##$d_baseDir/} : CurrentConnections_1 : Line Number ${LINENO}"
+	# sh: invalid number '' - was bug in dpct
 	 $doArchiveLiveUpdates
-	Send2Log " >>> doArchiveliveUpdates:  $doArchiveLiveUpdates" 3 "${0##$d_baseDir/} : CurrentConnections_1 : Line Number ${LINENO}"
+	# Send2Log " >>> doArchiveliveUpdates:  $doArchiveLiveUpdates" 4 "${0##$d_baseDir/} : CurrentConnections_1 : Line Number ${LINENO}"
 }
 
 loads=$(cat /proc/loadavg | cut -d' ' -f1,2,3 | tr -s ' ' ',')
@@ -122,4 +126,4 @@ echo -e "var last_update='$_ds $_ts'${_nl}serverload($loads)" > $_liveFilePath
 
 $doCurrConnections
 
-LogEndOfFunction "Finished" 3 "${0##$d_baseDir/} : End : Line Number ${LINENO}"
+FunctionUsage "Finished" 2 "${0##$d_baseDir/} : End : Line Number ${LINENO}"

@@ -8,6 +8,7 @@
 # Run - by cron jobs (update-reports & end-of-hour)
 #
 # History
+# 2026-06-13: Move the time stamps to the calling script - update-reports.sh
 # 2026-06-09: Add extra logging. Turn off ipv6 switch FIXME
 # 2026-06-02: Work around ov failure
 # 2026-05-22: 4.0.8 - no changes
@@ -32,21 +33,18 @@
 hr=$(echo "$_ts" | cut -d':' -f1)
 mm=$(echo "$_ts" | cut -d':' -f2)
 
-sm=$(printf %02d $(( ${mm#0} - ${_updateTraffic:-4} )))
-Send2Log "${0##$d_baseDir/} (traffic.sh) --> $hr:$sm -> $hr:$mm" 1 "${0##$d_baseDir/} Start @ Line Number-${LINENO}"
-
 GetMemory(){
 	GetMemoryField()
 	{
 		local result=$(echo "$meminfo" | grep "^$1:" | awk '{print $2}')
 		echo "${result:-0}"
-		Send2Log "GetMemoryField: $1=$result" 0 "${0##$d_baseDir/} : GetMemory : Line Number-${LINENO}"
+		Send2Log "GetMemoryField: $1 = $result" 0 "${0##$d_baseDir/} : GetMemory : Line Number ${LINENO}"
 	}
 	local meminfo=$(cat /proc/meminfo)
 	local freeMem=$(GetMemoryField "MemFree")
 	local availMem=$(( $freeMem + $(GetMemoryField "Buffers") + $(GetMemoryField "Cached") ))
 	local totMem=$(GetMemoryField "MemTotal")
-	Send2Log "GetMemoryField: memory --> $freeMem,$availMem,$totMem" 0 "${0##$d_baseDir/} : GetMemory : Line Number-${LINENO}"
+	Send2Log "GetMemoryField: memory --> $freeMem,$availMem,$totMem" 0 "${0##$d_baseDir/} : GetMemory : Line Number ${LINENO}"
 	echo "$freeMem,$availMem,$totMem"
 }
 
@@ -63,23 +61,22 @@ GetInterfaceTraffic(){
 		local current_down=$(echo "$line" | awk '{ print $10 }')
 		local current_up=$(echo "$line" | awk '{ print $2 }')
 		eval ov=\"\$$interfaceVar\"
-		# FIXME For some reason ov can end up empty, until we find out
-		# why, we'll force the issue with a restart
-		# FIXME now deletable #[ -z "$ov" ] && { Send2Log "Forcing a script restart as ov =: ${ov} : null " 2  "${0##$d_baseDir/} : GetInterfaceeTraffic : Line Number-${LINENO}"; start.sh reboot ; }
-		# for whatever reason the ov becomes useless.replace them with the last good values.
-		[ -z "$ov" ] && ov="$current_down,$current_up" &&  ChangePath "$interfaceVar" "$ov"  && Send2Log  "BUGFIX: ov - oldvalue was null, saving current values to paths.sh " 4  "${0##$d_baseDir/} : GetInterfaceTraffic : Line Number-${LINENO}"
+		# FIXME now deletable #[ -z "$ov" ] && { Send2Log "Forcing a script restart as ov =: ${ov} : null " 2  "${0##$d_baseDir/} : GetInterfaceeTraffic : Line Number ${LINENO}"; start.sh reboot ; }
+		# for whatever reason the ov returns empty. replace the null with the last good values.
+		#[ -z "$ov" ] && ov="$current_down,$current_up" &&  ChangePath "$interfaceVar" "$ov"  && Send2Log  "BUGFIX: ov - oldvalue was null, saving current values $ov to paths.sh " 4  "${0##$d_baseDir/} : GetInterfaceTraffic : Line Number ${LINENO}"
+		[ -z "$ov" ] && { ov="$current_down,$current_up" ;  ChangePath "$interfaceVar" "$ov" ; Send2Log  "BUGFIX: ov - oldvalue was null, saving current values $ov to paths.sh " 4  "${0##$d_baseDir/} : GetInterfaceTraffic : Line Number ${LINENO}" ; }
 
 # from dev version #[ -z "$l_lastvalue" ] && l_lastvalue="$l_current_down,$l_current_up" &&  ChangePath "$l_interfaceVar" "${l_lastvalue}"  && DbugLog "$dbug_sw" "${LINENO} oldvalue was null     {${l_lastvalue} so saving current values to paths.sh "
 		local new_down=$(( $current_down - $(echo "$ov" | cut -d',' -f1) ))
 		local new_up=$(( $current_up - $(echo "$ov" | cut -d',' -f2) ))
 		local interfaceLine="{\"n\":\"${interface%:}\", \"t\":\"$new_down,$new_up\"}"
-		Send2Log "GetInterfaceTraffic: interfaceLine - $interfaceLine -- $line -- $ov" 1 "${0##$d_baseDir/} : GetInterfaceTraffic : Line Number-${LINENO}"
+		Send2Log "GetInterfaceTraffic: interfaceLine - $interfaceLine -- $line -- $ov" 2 "${0##$d_baseDir/} : GetInterfaceTraffic : Line Number ${LINENO}"
 		iTotals="$iTotals, $interfaceLine"
 		if [ "$mm" -gt "$lastCheckinHour" ] ; then
 			ChangePath "$interfaceVar" "$current_down,$current_up"
 		fi
 	done
-	Send2Log "GetInterfaceTraffic - traffic by interface -- ${iTotals#,}" 0 "${0##$d_baseDir/} : GetInterfaceTraffic : Line Number-${LINENO}"
+	Send2Log "GetInterfaceTraffic - traffic by interface -- ${iTotals#,}" 2 "${0##$d_baseDir/} : GetInterfaceTraffic : Line Number ${LINENO}"
 	echo "${iTotals#,}"
 }
 
@@ -95,17 +92,17 @@ GetTraffic(){
 	local vnx=${1:--vnx}
 	local ltrl=0
 	[ "$vnx" == '-vnxZ' ] && ltrl=1
-	Send2Log "GetTraffic - $vnx ($ltrl)" 0 "${0##$d_baseDir/} : GetTraffic : Line Number-${LINENO}"
+	Send2Log "GetTraffic - $vnx ($ltrl)" 0 "${0##$d_baseDir/} : GetTraffic : Line Number ${LINENO}"
 
 	local macIPList=$(cat "$macIPFile")
 
 	local ip4t=$(iptables -L "$YAMON_IPTABLES" "$vnx" | awk '{ print $2,$8,$9 }' | grep "^[1-9]")
 	local ip6t="$ip6tablesFn"
 
-	[ -z "$ip4t" ] && Send2Log "GetTraffic - No IPv4 traffic" 0 "${0##$d_baseDir/} : GetTraffic : Line Number-${LINENO}"
-	[ -z "$ip6t" ] && Send2Log "GetTraffic - No IPv6 traffic" 0 "${0##$d_baseDir/} : GetTraffic : Line Number-${LINENO}"
+	[ -z "$ip4t" ] && Send2Log "GetTraffic - No IPv4 traffic" 0 "${0##$d_baseDir/} : GetTraffic : Line Number ${LINENO}"
+	[ -z "$ip6t" ] && Send2Log "GetTraffic - No IPv6 traffic" 0 "${0##$d_baseDir/} : GetTraffic : Line Number ${LINENO}"
 	if [ -z "$ip4t" ] && [ -z "$ip6t" ] ; then
-		Send2Log "GetTraffic - No traffic at all... checking chains!" 3 "${0##$d_baseDir/} : GetTraffic : Line Number-${LINENO}"
+		Send2Log "GetTraffic - No traffic at all... checking chains!" 3 "${0##$d_baseDir/} : GetTraffic : Line Number ${LINENO}"
 		> $macIPFile
 		source "${d_baseDir}/includes/setupIPChains.sh"
 		SetupIPChains
@@ -130,16 +127,16 @@ GetTraffic(){
 		fi
 		local tip="\b${ip//\./\\.}\b"
 
-		Send2Log "GetTraffic: $fl / $ip)" 0 "${0##$d_baseDir/} : GetMemory : Line Number-${LINENO}"
+		Send2Log "GetTraffic: $fl / $ip)" 0 "${0##$d_baseDir/} : GetMemory : Line Number ${LINENO}"
 # Glenn McKechnie - modified 31/05/26 19:15
 		if [ "$_generic_ipv4" == "$ip" ] || [ "$_generic_ipv4" == "$ip" ] ; then
 			#unmatched traffic
-			Send2Log "GetTraffic: Unmatched traffic $(IndentList "$fl")" 2 "${0##$d_baseDir/} : GetTraffic : Line Number-${LINENO}"
+			Send2Log "GetTraffic: Unmatched traffic $(IndentList "$fl")" 2 "${0##$d_baseDir/} : GetTraffic : Line Number ${LINENO}"
 			# (so check-network is only executed when there is new unmatched data)
 			${d_baseDir}/check-network.sh
 			UpdateLastSeen "${_generic_mac}-${ip}" "$tls"
 			local do=$(echo "$ipt" | head -n 1 | cut -d' ' -f1)
-			Send2Log "GetTraffic: down: $do / $total_down " 1 "${0##$d_baseDir/} : GetTraffic : Line Number-${LINENO}"
+			Send2Log "GetTraffic: down: $do / $total_down " 1 "${0##$d_baseDir/} : GetTraffic : Line Number ${LINENO}"
 			total_down=$(( $total_down + ${do:-0} )) #assuming total_up is zero because all traffic goes to a single iptable rule
 			local newLine="hourlyData4({ \"id\":\"$_generic_mac-$ip\", \"hour\":\"$hr\", \"traffic\":\"${do:-0},0,$(( ${do:-0} * $currentlyUnlimited )),0\" })"
 			intervalTraffic="$intervalTraffic\n$newLine"
@@ -152,10 +149,10 @@ GetTraffic(){
 
 			if [ "$_logNoMatchingMac" -eq "1" ] ; then
 				iptables -A "$YAMON_IPTABLES" -j LOG --log-prefix "YAMon: "
-				Send2Log "GetTraffic: re-zeroed LOG rule in $YAMON_IPTABLES (entry #$wo)" 2 "${0##$d_baseDir/} : GetTraffic : Line Number-${LINENO}"
+				Send2Log "GetTraffic: re-zeroed LOG rule in $YAMON_IPTABLES (entry #$wo)" 2 "${0##$d_baseDir/} : GetTraffic : Line Number ${LINENO}"
 			else
 				iptables -A "$YAMON_IPTABLES" -j RETURN
-				Send2Log "GetTraffic: re-zeroed RETURN rule in $YAMON_IPTABLES (entry #$wo)" 2 "${0##$d_baseDir/} : GetTraffic : Line Number-${LINENO}"
+				Send2Log "GetTraffic: re-zeroed RETURN rule in $YAMON_IPTABLES (entry #$wo)" 2 "${0##$d_baseDir/} : GetTraffic : Line Number ${LINENO}"
 			fi
 
 			ipt=$(echo -e "$ipt" | grep -v "$fl") #delete just the first entry from the list of IPs
@@ -163,9 +160,9 @@ GetTraffic(){
 			local mac=$(echo "$macIPList" | grep "$tip" | cut -d' ' -f1)
 			if [ -z "$mac" ] ; then
 				mac=$(GetMACbyIP "$ip")
-				Send2Log "GetTraffic: no matching entry for $fl.  Appending \`$mac $ip\` to macIPFile" 2 "${0##$d_baseDir/} : GetTraffic : Line Number-${LINENO}"
+				Send2Log "GetTraffic: no matching entry for $fl.  Appending \`$mac $ip\` to macIPFile" 2 "${0##$d_baseDir/} : GetTraffic : Line Number ${LINENO}"
 				echo -e "$mac $ip" >> "$macIPFile"
-				Send2Log "GetTraffic: Checking users.js for \`$mac $ip\`" 1 "${0##$d_baseDir/} : GetTraffic : Line Number-${LINENO}"
+				Send2Log "GetTraffic: Checking users.js for \`$mac $ip\`" 1 "${0##$d_baseDir/} : GetTraffic : Line Number ${LINENO}"
 				CheckMAC2IPinUserJS "$mac" "$ip"
 				CheckIPTableEntry "$i"
 				CheckMAC2GroupinUserJS "$mac" ""
@@ -176,12 +173,12 @@ GetTraffic(){
 				local up=$(echo "$ipt" | grep -E "$tip ($_generic_ipv4|$_generic_ipv6)" | cut -d' ' -f1)
 				total_down=$(( $total_down + ${do:-0} ))
 				total_up=$(( $total_up + ${up:-0} ))
-				Send2Log "GetTraffic: $mac-$ip / ${do:-0} / ${up:-0} / $hr" 0 "${0##$d_baseDir/} : GetTraffic : Line Number-${LINENO}"
+				Send2Log "GetTraffic: $mac-$ip / ${do:-0} / ${up:-0} / $hr" 0 "${0##$d_baseDir/} : GetTraffic : Line Number ${LINENO}"
 				local newLine="hourlyData4({ \"id\":\"$mac-$ip\", \"hour\":\"$hr\", \"traffic\":\"${do:-0},${up:-0},$(( ${do:-0} * $currentlyUnlimited )),$(( ${up:-0} * $currentlyUnlimited ))\" })"
 				intervalTraffic="$intervalTraffic\n$newLine"
 				UpdateLastSeen "$mac-$ip" "$tls"
 			else
-				Send2Log "GetTraffic: still no matching mac for '$ip'?!? skipping this entry$(IndentList "$fl")" 3 "${0##$d_baseDir/} : GetTraffic : Line Number-${LINENO}"
+				Send2Log "GetTraffic: still no matching mac for '$ip'?!? skipping this entry$(IndentList "$fl")" 3 "${0##$d_baseDir/} : GetTraffic : Line Number ${LINENO}"
 			fi
 			ipt=$(echo -e "$ipt" | grep -v "$tip") #delete all matching entries for the current IP
 		fi
@@ -191,11 +188,11 @@ GetTraffic(){
 	local hrlyData=$(cat "$hourlyDataFile")
 
 	local currentUptime=$(cat /proc/uptime | cut -d' ' -f1)
-	[ -z "$currentUptime" ] && Send2Log "GetTraffic: currentUptime is null?!?" 2 "${0##$d_baseDir/} : GetTraffic : Line Number-${LINENO}"
+	[ -z "$currentUptime" ] && Send2Log "GetTraffic: currentUptime is null?!?" 2 "${0##$d_baseDir/} : GetTraffic : Line Number ${LINENO}"
 
 	if [ -n "$currentUptime" ] && [ "$currentUptime" \< "$_uptime" ] ; then
 		local rebootFile="${tmplog}reboot-${_ds}.js"
-		Send2Log "GetTraffic: rebooted ($currentUptime < $_uptime) --> save current hour data to reboot${_ds}.js" 2 "${0##$d_baseDir/} : GetTraffic : Line Number-${LINENO}"
+		Send2Log "GetTraffic: rebooted ($currentUptime < $_uptime) --> save current hour data to reboot${_ds}.js" 2 "${0##$d_baseDir/} : GetTraffic : Line Number ${LINENO}"
 		echo "//Uptime: $currentUptime < $_uptime" >> "$rebootFile"
 		echo "$hrlyData" | grep "\"hour\":\"$hr\"" >> "$rebootFile"
 		cp "$rebootFile" "$_path2CurrentMonth"
@@ -208,11 +205,11 @@ GetTraffic(){
 	totalsLine="Totals({ \"hour\":\"$hr\", \"uptime\":\"$currentUptime\", \"interval\":\"$total_down,$total_up\",\"interfaces\":'[$interfaceTotals]',\"memory\":'$memoryTotals',\"disk_utilization\":'$disk_utilization' })"
 
 	if [ -n  "$intervalTraffic" ] ; then
-		Send2Log "GetTraffic ($hr:$mm --> $vnx): intervalTraffic --> $(IndentList "$intervalTraffic\n$totalsLine")" $ltrl "${0##$d_baseDir/} : GetTraffic : Line Number-${LINENO}"
+		Send2Log "GetTraffic ($hr:$mm --> $vnx): intervalTraffic --> $(IndentList "$intervalTraffic\n$totalsLine")" $ltrl "${0##$d_baseDir/} : GetTraffic : Line Number ${LINENO}"
 		echo -e "$(echo "$hrlyData" | grep -v "\"hour\":\"$hr\"")\n${intervalTraffic//,0,0\"/\"}\n${totalsLine//,0,0\"/\"}" > "$hourlyDataFile"
 		echo -e "\n//$hr:$(printf %02d $(( ${mm#0} - ${_updateTraffic:-4} )))->$hr:$mm ($vnx)\n${intervalTraffic//,0,0\"/\"}\n${totalsLine//,0,0\"/\"}" >> "$rawtraffic_hr"
 	else
-		Send2Log "GetTraffic ($hr:$mm): No traffic" 1 "${0##$d_baseDir/} : GetTraffic : Line Number-${LINENO}"
+		Send2Log "GetTraffic ($hr:$mm): No traffic" 1 "${0##$d_baseDir/} : GetTraffic : Line Number ${LINENO}"
 		local str="Totals({ \"hour\":\"$hr\""
 		echo -e "$(echo "$hrlyData" | grep -v "$str")\n${totalsLine//,0,0\"/\"}" > "$hourlyDataFile"
 		echo -e "\n//$hr:$(printf %02d $(( ${mm#0} - ${_updateTraffic:-4} )))->$hr:$mm ($vnx)\n//No traffic" >> "$rawtraffic_hr"
