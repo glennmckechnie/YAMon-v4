@@ -1,4 +1,16 @@
 # YAMon-v4
+
+**2026-06-21**
+
+Multiple changes, main ones being that the **Group / Devices** code has been reworked to use the updated field in the users.js file, rework the ** "active:"0" / "1" ** fields and most importantly, prune the file of entries that are inactive and over **30 days old**.
+To stop making recursive symlinks - once and for all (too soon?)
+There's now a backup script that will duplicate the installation, without following the symlinks! So you get the actual files and directories as they were at capture time. Optional to unpack tarball.
+LocalCopies of newer jquery files, and alternative index.html files.
+A full local installation will now use the local files without javascript error. A lot depends on the browser being used - I found brave and firefox worked --- for me. YMWV. I'll expand on this quirk in an issue later.
+You can still use usage-monitoring, but a local installation does work without any inspectQ problems. If it doesn't -contact me.
+Fixed missing path generation in paths.sh, and added flags so that the shortfall is ...flagged! Date rollovers are a little smoother now.
+
+
 **2026-05-26**
 
 Fix the timing of calls, and variables, so that the local java script files in the main html page can work as expected. Speed has improved, graph display, and hopefully a few of the other display errors will disappear. There are still a few subtle annoyances from the usage.monitor code but local *.js are now working - fully.
