@@ -147,7 +147,8 @@ ln -snf "$tmplog" "$d_baseDir"
 
 if [ -f "$_lastSeenFile" ] ; then
 	cp "${_lastSeenFile}" "$tmpLastSeen"
-	cp "$_lastSeenFile" "${_lastSeenFile/.js/-${_ds}-${_ts}.js}"
+	# next is optional. More for diagnostics / debug
+	cp "$_lastSeenFile" "${_path2CurrentMonth}lastseen-debug-${_ds}-${_ts}.js}"
 fi
 
 [ -z "$1" ] && rebootOrStart='Script Restarted' || rebootOrStart='Server Rebooted'

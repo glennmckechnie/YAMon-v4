@@ -57,8 +57,8 @@ else
 	acRules="$(crontab -l)"
 fi
 
-Send2Log "crontab: $(IndentList "$acRules")" 0  "${0##$d_baseDir/} : Main : Line Number ${LINENO}"
-Send2Log "blocked: $(IndentList "$(iptables -L | grep blocked -B 2)")" 0  "${0##$d_baseDir/} : Main : Line Number ${LINENO}"
+Send2Log "crontab entries: $(IndentList "$acRules")" 0  "${0##$d_baseDir/} : Main : Line Number ${LINENO}"
+Send2Log "iptables blocked?: $(IndentList "$(iptables -L | grep blocked -B 2)")" 0  "${0##$d_baseDir/} : Main : Line Number ${LINENO}"
 Send2Log "End of hour: append \`$tmplogFile\` to \`$dailyLogFile\`" 1  "${0##$d_baseDir/} : Main : Line Number ${LINENO}"
 #contents of tmplog minus the header lines
 tmplogContents=$(cat "$tmplogFile" | grep -v "<\(/\{0,1\}head\|html\|meta\|link\|script\|head\|body\|!--header--\)")
@@ -95,7 +95,7 @@ echo "<html lang='en'>
 Send2Log "End of hour: remove \`$rawtraffic_hr\`" 1  "${0##$d_baseDir/} : Main : Line Number ${LINENO}"
 rm "$rawtraffic_hr"
 
-Send2Log "Disk Usage: $(IndentList "$(ps | df -Th )")" 0  "${0##$d_baseDir/} : Main : Line Number ${LINENO}"
+Send2Log "Disk Usage: $(IndentList "$(df -Th )")" 0  "${0##$d_baseDir/} : Main : Line Number ${LINENO}"
 Send2Log "Processes: $(IndentList "$(ps | grep -v grep | grep $d_baseDir)")" 0  "${0##$d_baseDir/} : Main : Line Number ${LINENO}"
 
 FunctionUsage "Finished" 2 "${0##$d_baseDir/} : Main - end : Line Number ${LINENO}"
