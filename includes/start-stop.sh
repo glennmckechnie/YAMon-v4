@@ -28,7 +28,7 @@
 #
 ##########################################################################
 
-Send2Log "start-stop" 2 "${0##$d_baseDir/} : Main-start : Line Number ${LINENO}"
+FunctionUsage "start-stop" 2 "${0##$d_baseDir/} : Main-start : Line Number ${LINENO}"
 #set -v -x
 
 if [ "$_firmware" -eq "0" ] ; then
@@ -194,7 +194,7 @@ StopScheduledJobs(){
 	_backup="${d_baseDir}/data/yamon-$(date +%Y%m%d)"
 	[ -d "${_backup}" ] || mkdir -p "${_backup}"
 	cp -af "${tmplog}/." "${_backup}/"
-	Send2Log "Created copy of current files in $_backup" 0 "${0##$d_baseDir/} : StopScheduledJobs : Line Number ${LINENO}" 
+	Send2Log "Created copy of current ${tmplog} files in $_backup directory" 0 "${0##$d_baseDir/} : StopScheduledJobs : Line Number ${LINENO}" 
 }
 SetAccessRestrictions(){
 	local fileContents=$(cat "$cronJobsFile")
