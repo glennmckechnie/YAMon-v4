@@ -73,9 +73,12 @@ SetWebDirectories()
 			[ -L "$2" ] && rm -fv -- "$2"
 			ln -snf -- "$1" "$2"
 		fi
+		Send2Log "ln -snf -- $1 $2"
 	}
 	Send2Log "SetWebDirectories : start Main" 1  "${0##$d_baseDir/} : SetWebDirectories : Line Number ${LINENO}"
 	[ -d "${_wwwPath}" ] || mkdir -p "${_wwwPath}"
+	[ -d "${d_basedir}/www/files" ] || mkdir -p "${d_baseDir}/www/files"
+	Send2Log "[ -d ${d_basedir}/www/files ] || mkdir -p ${d_baseDir}/www/files"
 	# [ -d "${_wwwPath}js" ] || mkdir -p "${_wwwPath}js"
 	chmod -R a+rX "${_wwwPath}"
 	#FIXME
@@ -88,6 +91,10 @@ SetWebDirectories()
 	# add js path using our local files
 	AddSoftLink "${d_baseDir}/www/js" "${_wwwPath}js"
 	AddSoftLink "${d_baseDir}/www/current" "${_wwwPath}current"
+	AddSoftLink "${d_baseDir}/www/files" "${_wwwPath}files"
+	AddSoftLink "${d_baseDir}/daily-bu" "${_wwwPath}files/daily-bu"
+	AddSoftLink "${d_baseDir}/data" "${_wwwPath}files/data"
+	AddSoftLink "/tmp${_wwwURL}" "${d_baseDir}/www/files/yamon"
 	AddSoftLink "${d_baseDir}/www/yamon4.0.html" "${_wwwPath}index4.html"
 	AddSoftLink "${d_baseDir}/www/yamon4.0.7.html" "${_wwwPath}index7.html"
 	AddSoftLink "${d_baseDir}/www/yamon4.0.8.html" "${_wwwPath}index.html"
