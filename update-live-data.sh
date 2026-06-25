@@ -45,7 +45,7 @@ CurrentConnections_1()
 	Send2Log "Running CurrentConnections_1 --> $_liveFilePath" 0 "${0##$d_baseDir/} : CurrentConnections_1 : Line Number ${LINENO}"
 
 	ArchiveLiveUpdates_0()
-	{ #_doArchiveLiveUpdates=0 --> do nothing, the option is disabled
+	{ #_doArchiveLiveUpdates=0 --> do nothing as the option is disabled.
 		return
 	}
 	ArchiveLiveUpdates_1(){ #_doArchiveLiveUpdates=1
@@ -57,7 +57,7 @@ CurrentConnections_1()
 		dpct=$(df -P "$d_baseDir" 2>/dev/null | awk 'NR==2{print $5}')
 		if printf '%s' "$dpct" | grep -qE '^[0-9]+%$'; then
 		  dspace=$(printf '%02d' "${dpct%\%}")
-		  Send2Log "ArchiveLiveUpdates :  ${dpct} becomes ${dspace} available" 0 "${0##$d_baseDir/} : ArchiveLiveUpdates_1 : Line Number ${LINENO}"
+		  Send2Log "ArchiveLiveUpdates_1:  ${dpct} becomes ${dspace} available" 0 "${0##$d_baseDir/} : ArchiveLiveUpdates_1 : Line Number ${LINENO}"
 		else
 		  # NaN or ?? - pass a safe default
 		  dspace='99'
@@ -71,9 +71,10 @@ CurrentConnections_1()
 		# fi
 		if [ "$dspace" -lt '90' ] ; then
 			cat "$_liveFilePath" >> "$_liveArchiveFilePath"
-			# Send2Log "ArchiveLiveUpdates : cat $_liveFilePath >> $_liveArchiveFilePath" 3 "${0##$d_baseDir/} : ArchiveLiveUpdates_1 : Line Number ${LINENO}"
+			# Send2Log "ArchiveLiveUpdates_1: cat $_liveFilePath >> $_liveArchiveFilePath" 3 "${0##$d_baseDir/} : ArchiveLiveUpdates_1 : Line Number ${LINENO}"
 		else
-			Send2Log "ArchiveLiveUpdates_: skipped because of low / unknown disk space: $dpct" 4 "${0##$d_baseDir/} : ArchiveLiveUpdates_1 : Line Number ${LINENO}"
+			Send2Log "ArchiveLiveUpdates_1: skipped because of low / unknown disk space: $dpct" 4 "${0##$d_baseDir/} : ArchiveLiveUpdates_1 : Line Number ${LINENO}"
+			Send2Log "Disk Usage: $(IndentList "$(df -Th )")" 0  "${0##$d_baseDir/} : ArchiveLiveUpdates_1 : Line Number ${LINENO}"
 		fi
 	}
 	
