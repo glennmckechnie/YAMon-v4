@@ -3,6 +3,8 @@
 **2026-06-28**
 
    Package previous master as release 4.0.7
+
+   Released this as 4.0.8
    
    See changes.log for updates in master repo
    
