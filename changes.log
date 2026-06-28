@@ -6,6 +6,10 @@
 # Summary of changes in YAMon
 
 * History
+  > 2026-06-28: 4.0.8
+	+ add Files Button to Logs page. Easier access to data files etc.
+	+ General cleanup pre merge Dev --> Master branch
+
   > 2026-06-18: 4.0.8
 	+ backupYAMon4.sh - tweaks, pass option to enable unpacking process.
 	+ add logging to check-network.sh, calculate-daily-totals.sh, end-of-day.sh, end-of-hour.sh,
