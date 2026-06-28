@@ -1,65 +1,7 @@
 # YAMon-v4
 
-**2026-06-21**
-
-Multiple changes, main ones being that the **Group / Devices** code has been reworked to use the updated field in the users.js file, rework the **"active:"0" / "1"** fields and most importantly, prune the file of entries that are inactive and over **30 days old**.
-To stop making recursive symlinks - once and for all (too soon?)
-There's now a backup script that will duplicate the installation, without following the symlinks! So you get the actual files and directories as they were at capture time. Optional to unpack tarball.
-LocalCopies of newer jquery files, and alternative index.html files.
-A full local installation will now use the local files without javascript error. A lot depends on the browser being used - I found brave and firefox worked --- for me. YMWV. I'll expand on this quirk in an issue later.
-You can still use usage-monitoring, but a local installation does work without any inspectQ problems. If it doesn't -contact me.
-Fixed missing path generation in paths.sh, and added flags so that the shortfall is ...flagged! Date rollovers are a little smoother now.
-
-
-**2026-05-26**
-
-Fix the timing of calls, and variables, so that the local java script files in the main html page can work as expected. Speed has improved, graph display, and hopefully a few of the other display errors will disappear. There are still a few subtle annoyances from the usage.monitor code but local *.js are now working - fully.
-To use the local javascript files then the tick box in Settings, "Use this servers JS & CSS files", ie:- (dev) should be ticked.
-Unticked goes to the usage.monitoring files.
-
-**2026-05-22**
-
-Added a backup and restore routines into the scripts (**start.sh**, and **pause** which calls includes/start-stop.sh ). Those files are called by the init.d script. They will now copy/restore the contents of /tmp/yamon between restarts. The actual data copied is stored in a dated directory of the style **/opt/YAMon4/data/yamon-YYYYMMDD**.
-
-If you don't inoke the yamon init.d script, nothing will happen except holes in the data, and some frustration.
-This also doesn't save data from a system crash, but if a cronjob was setup then there would always be a copy on hand. Your machine, your choice. 
-Deletion of those stale directories will be a FIXME issue - later.
-
-**2026-05-22**
-
-  Attempt 2 at fixes for missing web symlinks. Additions to aid debugging. Bump version to **YAMon4-0.8** as there have been enough incremental improvements to warrant drawing a line in the sand.
-  
-**2025-02-24**
-
-Fixed a couple of show stopping bugs, both existing and mine! 
-
-And... after dogfooding it on an  **Openrt One** unit I can say that it does work. 
-
-It's still a little messy to get up and running and the **validation.sh** script is still your friend - run it after the setup script is finished.
-With the OpenWrt One router, you need to install the _iptables-legacy_ package. I installed **bash** but that's probably not essential.
-
-After downloading the zip file, unpack it and rename the resulting directory to **YAMon4**. 
-Then **cd YAMon4** and run **install.sh**, which will then launch **setup4.0.8.sh** where you will populate the **config.file** and be given the option to start it.
-
-**Managing YAMon**
-
-To start YAMon, execute the init script - _/etc/init.d/yamon4 (start | stop)_ or **bash start.sh reboot** .
-
-To stop YAMon, execute **bash pause.sh** AND also stop the **cron** daemon; or inactivate the crontab entries
-
-To clear the iptables entries, run **clear-iptables.sh**
-
-Also... **pause.sh** now disables all YAMon4 cron entries. Hopefully this will reduce the data file corruption.
-
-It's worth noting that stopping cron from firing is the only way to stop YAMon4 properly.
-They are the daemons that control YAMon4.
-
- If they are enabled (via **start.sh reboot**) and cron is running then YAMon4 is running.
- 
- If they are disabled (via **pause.sh** ... or stopping cron) then YAMon4 is stopped.
-
-
-<hr>
+**2026-06-28**
+   Package previous master as 
 
 YA Fork of YAMon v4 !
 
@@ -147,3 +89,67 @@ Permission to use and/or distribute this software for any purpose without fee is
 - Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
 
 THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+
+# Previous updates / Changes
+
+**2026-06-21**
+
+Multiple changes, main ones being that the **Group / Devices** code has been reworked to use the updated field in the users.js file, rework the **"active:"0" / "1"** fields and most importantly, prune the file of entries that are inactive and over **30 days old**.
+To stop making recursive symlinks - once and for all (too soon?)
+There's now a backup script that will duplicate the installation, without following the symlinks! So you get the actual files and directories as they were at capture time. Optional to unpack tarball.
+LocalCopies of newer jquery files, and alternative index.html files.
+A full local installation will now use the local files without javascript error. A lot depends on the browser being used - I found brave and firefox worked --- for me. YMWV. I'll expand on this quirk in an issue later.
+You can still use usage-monitoring, but a local installation does work without any inspectQ problems. If it doesn't -contact me.
+Fixed missing path generation in paths.sh, and added flags so that the shortfall is ...flagged! Date rollovers are a little smoother now.
+
+
+**2026-05-26**
+
+Fix the timing of calls, and variables, so that the local java script files in the main html page can work as expected. Speed has improved, graph display, and hopefully a few of the other display errors will disappear. There are still a few subtle annoyances from the usage.monitor code but local .js are now working - fully.
+To use the local javascript files then the tick box in Settings, "Use this servers JS & CSS files", ie:- (dev) should be ticked.
+Unticked goes to the usage.monitoring files.
+
+**2026-05-22**
+
+Added a backup and restore routines into the scripts (**start.sh**, and **pause** which calls includes/start-stop.sh ). Those files are called by the init.d script. They will now copy/restore the contents of /tmp/yamon between restarts. The actual data copied is stored in a dated directory of the style **/opt/YAMon4/data/yamon-YYYYMMDD**.
+
+If you don't inoke the yamon init.d script, nothing will happen except holes in the data, and some frustration.
+This also doesn't save data from a system crash, but if a cronjob was setup then there would always be a copy on hand. Your machine, your choice. 
+Deletion of those stale directories will be a FIXME issue - later.
+
+**2026-05-22**
+
+  Attempt 2 at fixes for missing web symlinks. Additions to aid debugging. Bump version to **YAMon4-0.8** as there have been enough incremental improvements to warrant drawing a line in the sand.
+  
+**2025-02-24**
+
+Fixed a couple of show stopping bugs, both existing and mine! 
+
+And... after dogfooding it on an  **Openrt One** unit I can say that it does work. 
+
+It's still a little messy to get up and running and the **validation.sh** script is still your friend - run it after the setup script is finished.
+With the OpenWrt One router, you need to install the _iptables-legacy_ package. I installed **bash** but that's probably not essential.
+
+After downloading the zip file, unpack it and rename the resulting directory to **YAMon4**. 
+Then **cd YAMon4** and run **install.sh**, which will then launch **setup4.0.8.sh** where you will populate the **config.file** and be given the option to start it.
+
+**Managing YAMon**
+
+To start YAMon, execute the init script - _/etc/init.d/yamon4 (start | stop)_ or **bash start.sh reboot** .
+
+To stop YAMon, execute **bash pause.sh** AND also stop the **cron** daemon; or inactivate the crontab entries
+
+To clear the iptables entries, run **clear-iptables.sh**
+
+Also... **pause.sh** now disables all YAMon4 cron entries. Hopefully this will reduce the data file corruption.
+
+It's worth noting that stopping cron from firing is the only way to stop YAMon4 properly.
+They are the daemons that control YAMon4.
+
+ If they are enabled (via **start.sh reboot**) and cron is running then YAMon4 is running.
+ 
+ If they are disabled (via **pause.sh** ... or stopping cron) then YAMon4 is stopped.
+
+
+<hr>
