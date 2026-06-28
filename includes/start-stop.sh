@@ -46,9 +46,9 @@ fi
 
 ResetCron(){
 	#to do --> confirm paths for other firmware variants... works in Turris & dd-wrt
-	Send2Log "ResetCron: $stopService / $startService" 1 "${0##$d_baseDir/} : Reset Cron : Line Number ${LINENO}"
+	Send2Log "ResetCron: $stopService --- $startService" 1 "${0##$d_baseDir/} : Reset Cron : Line Number ${LINENO}"
 	$stopService 2>/dev/null #redirecting spurious error messages to /dev/null
-	sleep 1
+	sleep 4
 	Send2Log "Cron should be stopped : $(ps | grep [c]ron)" 2 "${0##$d_baseDir/} : Reset Cron : Line Number ${LINENO}"
 	$startService 2>/dev/null #redirecting spurious error messages to /dev/null
 	Send2Log "Cron should now be running : $(ps | grep [c]ron)" 2 "${0##$d_baseDir/} : Reset Cron : Line Number ${LINENO}"

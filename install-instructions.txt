@@ -1,4 +1,67 @@
-Welcome to the initial beta for YAMon v4. 
+
+YA Fork of YAMon v4 !
+
+This is a forked version of YAMon with modifications.
+
+The first and most important modification is to the install script, it should now work. Use install.original.sh, but keep reading...
+
+The original installer has been fixed and works as it did before the https:///usage-monitoring.com site changes. It is still available here but as it fetches the same files as in this repo then it can be consider redundant, usable but redundant. It will work only while the parent site remains up too. And with Al's long absence this could ?? be a problem.
+
+If you want the files in this repo here, then run the install.sh script
+
+So...You have choices, and only you can decide!
+
+There have been a quite a few modifications to the files here and to use them, you need to install them by using install.sh
+
+I've since added the Activ8me (Australia) ISPs csv files as an option for monthly downloads. It works! But I can't use it without changing the way YAMon accesses its files.
+Because, YAMon fetches the 2 main javascipt files from the parent site so I can't use my modified js/util4.0.js file. The existing html page doesn't know anything about my modified local version unless I turn off / bypass some hard coded URLs.
+
+To see the default configuration of YAMon in action, run your browsers inspector inspect(Q) for firefox - F12 key -, and you'll see what's happening. No doubt configuring the code that way made sense when changes could be rolled out to everyone from a centrally controlled server - and while the server remains, there are no longer any code updates. (As an aside - Al C. deserves a medal for supporting so many installation types/models. The central server would have made that task easier instead of impossible.)
+
+That said, there is a config option "_doLocalFiles=1" that can be set in the config.file. The default is set to "0" - use the usage-monitoring site files but that is a courtesy and a nod to Als creation. Ultimately you'll want to set it to "1" and use the much modified (improved / bug fixed) local version.
+
+
+For old, but still relevant installation tips & tricks for a manual install - which we are doing, see https://usage-monitoring.com/installv4.php
+
+Please report any issues from this repo as github issues via the link on this repo... https://github.com/glennmckechnie/YAMon-v4
+
+It has been ested on an OpenWRT One with the opkg iptables-zz-legacy installed.
+
+    This github installation method install.sh requires that the github repo is unpacked into /opt/YAMon and install.sh is run from there.
+
+    Run the validate.sh script when finished and make sure it matches.
+
+    Read.. https://usage-monitoring.com/v4Install+Validate.php
+
+FIXED: It's running, with an occasional misfire. On occasion the hourly file gets mangled, but the raw data back up has all the required values to rebuild the br0ken file. It's still early days in the testing stakes, and it did show me what I needed to know - what was using all my data ... several things!
+
+FIXED: I run noScript in the firefox browser, and despite adding an exception for my YAMon installation, the javascript doesn't always fire up. If I bypass NoScript completely, it will then fire up and continue running whichever state NoScript is in!
+
+But it does work, and apppears to be more informative than the nlbwmon package (nlbwmon 2024.02.21~c7616bcf-r1 ~21.66 KiB OpenWrt Traffic Usage Monitor) YMMV
+
+Added Als original copyright licence as a file. My trivial changes use the same licence.
+
+-------------------------------
+
+Managing YAMon
+
+To start YAMon, execute the init script - /etc/init.d/yamon4 (start | stop) or bash start.sh reboot .
+
+To stop YAMon, execute bash pause.sh AND also stop the cron daemon; or inactivate the crontab entries
+
+To clear the iptables entries, run clear-iptables.sh
+
+Also... pause.sh now disables all YAMon4 cron entries. Hopefully this will reduce the data file corruption.
+
+It's worth noting that stopping cron from firing is the only way to stop YAMon4 properly. They are the daemons that control YAMon4.
+
+If they are enabled (via start.sh reboot) and cron is running then YAMon4 is running.
+
+If they are disabled (via pause.sh ... or stopping cron) then YAMon4 is stopped.
+
+==========================================
+
+Welcome to the initial beta for YAMon v4.
 I have not started the setup/install script yet so you'll have to do things manually.
 
 See http://usage-monitoring.com/v4-beta.php for more info as it becomes available
@@ -9,10 +72,10 @@ Here's the rough steps
 * create a new directory for YAMon v4
 	mkdir /opt/YAMon4
 * copy contents of zip file to /opt/YAMon4
-* open /opt/YAMon4/config.file and tweak settings as required for your network 
+* open /opt/YAMon4/config.file and tweak settings as required for your network
 	-> in particular, add/set a value for _updateTraffic --> e.g., _updateTraffic=4 (#the number of minutes between checks for traffic on the network... this replaces _check4Devices & _publishInterval)
 	-> also make sure that firmware is set correctly
-		
+
 * give the files execute permission
 	chmod +x /opt/YAMon4/*.sh
 
@@ -56,7 +119,7 @@ You should see
 
 Copy the contents of the temporary log to /opt/YAMon4/logs, but running
 	/opt/YAMon4/copy-log.sh
-	
+
 Open the log in browser --> e.g., http://192.168.1.1/user/logs/2019-10-14.html
 Look for error messages (in bold red text)
 
@@ -65,7 +128,7 @@ In DD-WRT, enter
 	cat /tmp/cron.d/yamon_jobs
 In Turris, enter
 	crontab -l
-	
+
 You should see
 	0 0 5 * * root /opt/YAMon4/new-billing-interval.sh
 	59 * * * * root /opt/YAMon4/end-of-hour.sh
@@ -76,7 +139,7 @@ You should see
 	0 * * * * root /opt/YAMon4/new-hour.sh
 	* * * * * root /opt/YAMon4/update-live-data.sh
 	4-56/4 * * * * root /opt/YAMon4/update-reports.sh
-	
+
 NB - In Turris, the `root` will not appear in the cron job enties (but must be there for DD-WRT)
    - the `in-unlimited` entries will only appear if _unlimited_usage='1' in your config.file
 
