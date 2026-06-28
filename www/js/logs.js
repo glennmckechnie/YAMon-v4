@@ -11,7 +11,7 @@ $(document).ready(function(){
 	$('#logDate').parent('h1').prepend('<button id="b1d" title="go back one day"><</button>')
 	$('#logDate').parent('h1').append('<button id="c1d" title="go to current hour log">Hour</button>')
 	$('#logDate').parent('h1').append('<button id="d1d" title="go to current day log">Today</button>')
-	$('#logDate').parent('h1').append('<button id="f1e" title="go to the files section (backup &amp; data)">&rarr;Files</button>')
+	$('#logDate').parent('h1').append('<button id="f1e" title="go to the files section (backup &amp; data)">&rArr;Files</button>')
 	$( "input[name*='no-errors']" ).parents('label').append(' ('+$('.err').length+')')
 	$( "input[name*='no-ll0']" ).attr('checked', false)
 	$( "input[name*='no-ll0']" ).parents('label').append(' ('+$('.ll0').length+')')

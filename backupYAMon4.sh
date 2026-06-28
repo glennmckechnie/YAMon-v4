@@ -58,12 +58,11 @@ echo
 	sleep 1
 	delay=$((delay - 1))
 	done
-echo -e "\n-----------------------------"
+echo -e "\n-------------Archiving----------------"
 
 	# Make the archive...
-	# not working
-	#( tar -hcf - "$dir1" "$dir2" 2>tar1.err ; tar -cf - "$file2" "$file3" 2>tar2.err ) | ( tee >(gzip -9 > "$tmpfile.tar.gz") | tar tvf - )
-	(tar -hcf - "$baseDir" "$dir1" "$dir2" ; tar -cf - "$file1" )| gzip -9 > "${tmpfile}.tar.gz"
+	tar -hcf  "${tmpfile}.tar.gz" "$baseDir"  2>/dev/null
+	pwd
 	ls -al "${tmpfile}.tar.gz"
 	date
 

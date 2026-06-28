@@ -193,10 +193,9 @@ echo -e "${los}"
 echo -E "$_s_title"
 echo -e "${los}"
 
-_ds=$(date +"%Y-%m-%d")
-_ts=$(date +"%T")
+_dts=$(date +"%Y-%m-%d-%H-%M-%S")
 _tep=$(date +"%s")
-setupLogFile="/tmp/yamon/setup ($_ds $_ts).log"
+setupLogFile="/tmp/yamon/setup-${_dts}.log"
 [ ! -d "/tmp/yamon" ] && mkdir -p "/tmp/yamon"
 [ ! -f "$setupLogFile" ] && touch "$setupLogFile"
 

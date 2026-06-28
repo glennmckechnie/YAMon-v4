@@ -40,12 +40,7 @@ sleep 10 # delay ~10 seconds into next hour to allow tasks from previous hour to
 
 Send2Log "End of hour: append \`$rawtraffic_hr\` to \`$rawtraffic_day\`" 0 "${0##$d_baseDir/} : Main : Line Number ${LINENO}"
 cat "$rawtraffic_hr" >> "$rawtraffic_day"
-# redundant debug line # Send2Log "End of hour: copy \`$rawtraffic_hr\` to \`/opt/YAMon4/data/2025/03/raw-traffic-2025-03-28-${hr}.txt\`" 4 "${0##$d_baseDir/} : Main : Line Number ${LINENO}"
-#cat "$rawtraffic_hr" >> "/opt/YAMon4/data/2025/03/raw-traffic-2025-03-28-${hr}.txt"
-#dailyLogFile='/opt/YAMon4/logs/2026-06-02.html'
-#rawtraffic_day='/opt/YAMon4/data/2026/06/raw-traffic-2026-06-02.txt'
-#rawtraffic_hr='/tmp/yamon/raw-traffic-2026-06-02-21.txt'
-#Keep a copy of the individual hourly files before discarding.
+# Keep a copy of the individual hourly files before discarding.
 cat "$rawtraffic_hr" >> "${rawtraffic_day%.txt}-${hr}.txt"
 Send2Log "End of hour: DEBUG : copy \`$rawtraffic_hr\` to \`${rawtraffic_day%.txt}-${hr}.txt\`" 4 "${0##$d_baseDir/} : DEBUG : Line Number ${LINENO}"
 
