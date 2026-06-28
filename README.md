@@ -1,7 +1,12 @@
 # YAMon-v4
 
 **2026-06-28**
-   Package previous master as 
+
+   Package previous master as release 4.0.7
+   
+   See changes.log for updates in master repo
+   
+<hr>
 
 YA Fork of YAMon v4 !
 
