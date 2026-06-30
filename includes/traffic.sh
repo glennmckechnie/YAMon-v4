@@ -60,6 +60,7 @@ GetInterfaceTraffic(){
 		local interfaceVar="interface_$(echo "$line" | awk '{ print $1 }' | sed -e 's~\.~_~' -e 's~-~_~' -e 's~:~~')"
 		local current_down=$(echo "$line" | awk '{ print $10 }')
 		local current_up=$(echo "$line" | awk '{ print $2 }')
+		# fetch "last values" from previous hour
 		eval ov=\"\$$interfaceVar\"
 		# FIXME now deletable #[ -z "$ov" ] && { Send2Log "Forcing a script restart as ov =: ${ov} : null " 2  "${0##$d_baseDir/} : GetInterfaceeTraffic : Line Number ${LINENO}"; start.sh reboot ; }
 		# for whatever reason the ov returns empty. replace the null with the last good values.
@@ -73,6 +74,7 @@ GetInterfaceTraffic(){
 		Send2Log "GetInterfaceTraffic: interfaceLine - $interfaceLine -- $line -- $ov" 2 "${0##$d_baseDir/} : GetInterfaceTraffic : Line Number ${LINENO}"
 		iTotals="$iTotals, $interfaceLine"
 		if [ "$mm" -gt "$lastCheckinHour" ] ; then
+			# store "last values" for next hour
 			ChangePath "$interfaceVar" "$current_down,$current_up"
 		fi
 	done
