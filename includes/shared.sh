@@ -575,16 +575,17 @@ CheckIntervalFiles(){
 		Send2Log "CheckIntervalFiles: create directory: $_path2CurrentMonth" 1 "${0##$d_baseDir/} : CheckIntervalFiles: Line Number ${LINENO}"
 	fi
 	Send2Log "CheckIntervalFiles: create interval file: $_intervalDataFile" 1 "${0##$d_baseDir/} : CheckIntervalFiles: Line Number ${LINENO}"
+	# for readability. WYSIWYG
 	echo "var monthly_created=\"${_ds} ${_ts}\"
-	var monthly_updated=\"${_ds} ${_ts}\"
-	var monthlyDataCap=\"$_monthlyDataCap\"
-	var monthly_total_down=\"0\"	// 0 GB
-	var monthly_total_up=\"0\"	// 0 GB
-	var monthly_unlimited_down=\"0\"	// 0 GB
-	var monthly_unlimited_up=\"0\"	// 0 GB
-	var monthly_billed_down=\"0\"	// 0 GB
-	var monthly_billed_up=\"0\"	// 0 GB
-	" >> $_intervalDataFile
+var monthly_updated=\"${_ds} ${_ts}\"
+var monthlyDataCap=\"$_monthlyDataCap\"
+var monthly_total_down=\"0\"	// 0 GB
+var monthly_total_up=\"0\"	// 0 GB
+var monthly_unlimited_down=\"0\"	// 0 GB
+var monthly_unlimited_up=\"0\"	// 0 GB
+var monthly_billed_down=\"0\"	// 0 GB
+var monthly_billed_up=\"0\"	// 0 GB
+" >> $_intervalDataFile
 }
 
 HtmlHeader(){
