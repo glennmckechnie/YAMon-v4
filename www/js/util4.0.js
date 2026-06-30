@@ -50,6 +50,11 @@ function loadSettings(){
 	if(!g_Settings['show-tcp']) g_Settings['show-tcp']=true
 	if(!g_Settings['show-udp']) g_Settings['show-udp']=true
 	if(!g_Settings['show-unknown']) g_Settings['show-unknown']=false
+	/*
+	 * # Glenn McKechnie - modified 30/06/26 10:38
+	 * bypass Intro popup (PU)
+	 */
+	updateSettings('complete',1)
 
 	if(typeof(_dbkey)=='undefined' || _dbkey==''){
 		showLoading('Settings from localStorage')
@@ -105,10 +110,23 @@ function loadSettings(){
 	return deferred.promise()
 }
 function checkConfig(){
+	/* force a future time to bypass the nudge function
+	 * Glenn McKechnie - modified 29/06/26 23:02
+	 */
+	/*
+	 *g_Settings.fnd = "0xFFFFFFFF";
+	 */
 	var now='0x'+(((Date.now()/1000).toFixed(0))*1).toString(16)
 	if(!g_Settings['complete']==1) return false
 	if ((g_Settings.check4Updates!='n') && (g_Settings.nextCheck<now)) checkFiles()
 	if ((!g_Settings.fnd) || (g_Settings.fnd<now)) nudge('nudge')
+
+	/*
+	 *console.log('fnd', g_Settings.fnd, 'now', now, 'types', typeof g_Settings.fnd, typeof now);
+	 *console.log('fnd < now ?', g_Settings.fnd < now);
+	 *console.log('fnd (num)', Number(g_Settings.fnd), 'now (num)', Number(now));
+	 * */
+
 	if (((g_Settings['isp-reminders']!='') && (g_Settings['isp-reminders']!='n')) && (g_Settings['isp-ncd']<now)) getMessage('isp reminder', g_Settings['isp-lcd'])
 	if(!!Object.keys(g_IPii).length){
 		var messages=JSON.parse(localStorage.getItem('YAMon-messages'))||{}
@@ -2990,6 +3008,10 @@ function nudge(msg){
 	})
 }
 function addPU(){
+	/* Glenn McKechnie - modified 30/06/26 09:29
+	 * return ... Bypass Dismiss button
+	 */
+	return
 	var pu=$('<div/>').attr('id','pop-up'), arl=$('<article/>').addClass('left-col').attr('id','pop-up-body'), p=$('<p/>').attr('id','pu-comment').addClass('hidden'),p2=$('<p/>').addClass('a-c dismiss p-r').html("<button>Dismiss</button>"), fb=$('<div/>').addClass('fb-like').attr('data-href','https://www.facebook.com/UsageMonitoring/').attr('data-layout','standard').attr('data-width','200').attr('data-action','recommend').attr('data-size','small').attr('data-show-faces','false').attr('data-share','false')
 	arl.appendTo(pu)
 	p.appendTo(pu)

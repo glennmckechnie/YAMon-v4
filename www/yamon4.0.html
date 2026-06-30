@@ -82,13 +82,13 @@
 			</section>
 			<section id='main-body' class='p-r'>
 				<div class='_detanod' amount=20 title='Thank you in advance for your support!'>
-					<div class='submenu'>
+					<!-- div class='submenu'>
 						<span class='amount btn' amount=10 title='Donate $10'>$10</span>
 						<span class='amount btn' amount=15 title='Donate $15'>$15</span>
 						<span class='amount btn' amount=20 title='Donate $20... thanks!'>$20</span>
 						<span class='amount btn' amount=25 title='Donate $25 - wow!!!'>$25</span>
 						<span class='amount btn' amount='' title='Select this option to choose your own amount'>Other...</span>
-					</div>
+					</div -->
 				</div>
 				<div id='error-notification' class='p-r'>
 					<h1>This text will go away once all of the data has loaded.</h1>
@@ -1222,17 +1222,37 @@
 					<p>Version:<span class='scriptVersion'></span></p>
 
 					<hr/>
-					<p>For online help, FAQs, etc. either go to:</p>
+					<p>The original online help, FAQs, etc. is at</p>
 					<ul>
-						<li><a href='https://usage-monitoring.com' target='_blank'>https://usage-monitoring.com</a></li>
-						<li><a href='http://www.dd-wrt.com/phpBB2/viewtopic.php?p=1050090' target='_blank'>the YAMon 3.x forum at DD-WRT</a></li>
-						<li><a href='http://www.dd-wrt.com/phpBB2/viewtopic.php?t=259806' target='_blank'>the YAMon 2,x forum at DD-WRT</a></li>
+						<li><a href='https://usage-monitoring.com/help' target='_blank'>https://usage-monitoring.com/help</a></li>
+					</ul>
+					<hr/>
+					<h2>About this fork of YAMon4.</h2>
+					<p>You are now using a fork of Al Caugheys YAMon4 package.</p>
+					<p>This fork provides a fully working local installation and is as complete it can be, considering the absence of the original author and developer Al Caugheys, involvement.</p><br>
+					<p>This is forked from what is basically the <em>beta</em> version of YAMon4; an advanced beta, and for the most part working.</p>
+					<p>I've fixed quite a few bugs / quirks and filled in some of the missing features. It's at the point where it works quite well for me on an <b>OpenWRT One</b> router and it hasn't had any of the showstopping failures that I experienced earlier, as always though - YMMV.</p>
+					<p>So, see how you go, and I can be contacted via the github repo linked below if needed.</p><br>
+					<p>During the YAMon4 setup, you were given an option to use Als original site (and its files) in your installation, or to make the installation a fully local one.</p>
+					<p>If your choice was to use a local installation then the .png (etc), .css and *.js files (found in the images/, css/, and js/ directories) are now sourced directly from this local installation.</p>
+					<p>With that decision, any edits / changes you make to the local files will be usable here and remain after a reload. They will not be overwritten by the remote versions (and of course, as always; backups of your local installation and any changes will ensure that remains true.)</p>
+					<p>This also means that if (or when) usage-monitoring.com ceases to exist, YAMon4 will continue to work from this local configuration.</p><br>
+					<p>The parent site at usage-monitoring.com does not appear to be maintained any more. The database integration has gone and if you had a dbkey, it will not work.</p>
+					<p>In truth, being unmaintained and long in the tooth. I don't, and nor should you, have a high trust level on the usage-monitoring.com site anymore.</p><br>
+					<p>If what follows is a broken image, then the site has most likely gone.</p><p> <img src='https://usage-monitoring.com/images/report-tabs.png' alt=' ( it appears that the usage-monitoring site IS down)'></p>
+					<p>Instead, if it shows you the tabs image, then go and visit the rest of the help pages while they remain up. Visit the <a href='https://usage-monitoring.com/reports.php' target='_blank'>Reports</a> page at https://usage-monitoring.com/ for a more detailed description of each report and some background to it all</p>
+					<p>Most of the material there is not relevant to this version of YAMon4, but it is still worth a review</p><br>
+					<p>Regarding this installation, you can still access the original www.usage-monitoring.com and its files (that may still exist) by dis-abling the doLocalFile key in the <em>/opt/YAMon4/config.file</em>.</p>
+					<b><p>_doLocalFiles='1'  # make a local copy of JS, CSS and images: 0-&gt;no (this will use the offsite files) || 1-&gt;yes (this will use your local files)</b></p><br>
+					<p>However having a full local installation will allow development and bug fixes to the code to be preserved, and shared.</p>
+					<p>Bugs, fixes, suggestions, even some help, for this fork is available at github via...</p>
+					<ul>
+					<li><a href='https://github.com/glennmckechnie/YAMon-v4' target='_blank'>https://github.com/glennmckechnie/YAMon-v4</a></li>
 					</ul>
 
-					<p>Otherwise, if you have any questions/suggestions or find an error, drop me a <a href="mailto:questions@usage-monitoring.com?subject=Yet Another Monitor Questions%2FComments">line</a>.  I'll do my best to respond ASAP!</p>
 					<hr/>
-					<p>YAMon is based upon: <a href='http://code.google.com/p/wrtbwmon/' target='_blank'>wrtbwmon</a> by Emmanuel Brucy &  <a href='http://code.google.com/p/lal-projects/' target='_blank'>bw_monitor</a> by FezJay; and, adapted from modifications by: `bpsmicro`,`OrionShock` & others.  Thanks to `spanman` and too many others to mention here who've made suggestion for features & GUI improvements and/or patiently helped me find and resolve bugs</p>
-					<p>Thanks also to everyone who's made a <a href='https://usage-monitoring.com/donations.php'>donation</a>... I *really* appreciate those!  In case it is not blatantly obvious, you can make donations via Paypal.</p>
+					<p>YAMon is based upon: <a href='http://code.google.com/p/wrtbwmon/' target='_blank'>wrtbwmon</a> by Emmanuel Brucy &amp;  <a href='http://code.google.com/p/lal-projects/' target='_blank'>bw_monitor</a> by FezJay; and, adapted from modifications by: `bpsmicro`,`OrionShock` &amp; others.  Thanks to `spanman` and too many others to mention here who've made suggestion for features &amp; GUI improvements and/or patiently helped me find and resolve bugs</p>
+					<p>Thanks also to everyone who's made a <a href='https://usage-monitoring.com/donations.php'>donation</a></p>
 				</div>
 				<div id='myAlert' class='dlog hidden'>
 					<p>Alert
